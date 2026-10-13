@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0F2340">
-<title>ARWANA V7.39 — AI Terintegrasi</title>
+<title>ARWANA V7.40 — Chat AI Terintegrasi</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -1150,6 +1150,61 @@ main:has(.planning-feature-card), main:has(.planning-section-card){--planning-in
 @keyframes aiFadeUp{ from{ opacity:0; transform:translateY(10px) } to{ opacity:1; transform:translateY(0) } }
 .ai-page-wrap > *{ animation:aiFadeUp .42s cubic-bezier(.2,.8,.2,1) both }
 .ai-page-wrap > *:nth-child(2){ animation-delay:.06s } .ai-page-wrap > *:nth-child(3){ animation-delay:.12s }
+
+
+/* === CHAT AI — V7.40 Chat Mode === */
+.ai-mode-tabs{display:flex; gap:8px; padding:6px; border-radius:16px; background:var(--surface); border:1px solid var(--line); box-shadow:var(--sh-xs); width:fit-content; margin:18px 0 2px}
+.ai-mode-tab{border:0; background:transparent; padding:9px 16px; border-radius:11px; font-size:13px; font-weight:700; color:var(--muted); cursor:pointer; transition:.18s; display:inline-flex; align-items:center; gap:7px}
+.ai-mode-tab.active{background:linear-gradient(135deg,#0F2340,#1A365D); color:#fff; box-shadow:0 6px 16px rgba(15,35,64,.18)}
+.ai-mode-tab:hover:not(.active){background:var(--slate-100); color:var(--text2)}
+
+.ai-chat-card{display:flex; flex-direction:column; height:min(720px, 78vh); min-height:520px}
+.ai-chat-list{flex:1; overflow-y:auto; padding:18px; display:flex; flex-direction:column; gap:14px; scroll-behavior:smooth; background:linear-gradient(180deg, #F8FAFC 0%, #FFFFFF 100%)}
+.ai-chat-empty{display:grid; place-items:center; text-align:center; padding:40px 20px; gap:12px; color:var(--muted)}
+.ai-chat-empty .big{width:64px; height:64px; border-radius:18px; display:grid; place-items:center; font-size:28px; background:linear-gradient(135deg,#FFFBEB,#FDE68A); border:1px solid #FDE68A; color:#92400E}
+.ai-chat-empty h3{margin:0; font-family:"Plus Jakarta Sans"; font-weight:800; color:var(--text); font-size:15px}
+.ai-chat-empty p{margin:0; font-size:12.5px; line-height:1.6; max-width:380px}
+
+.ai-msg{display:flex; gap:10px; max-width:86%; animation:aiMsgIn .22s ease}
+.ai-msg.user{align-self:flex-end; flex-direction:row-reverse}
+.ai-msg.ai{align-self:flex-start}
+@keyframes aiMsgIn{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:translateY(0)}}
+.ai-msg .av{width:32px; height:32px; border-radius:10px; display:grid; place-items:center; font-size:12px; font-weight:800; flex:0 0 32px; border:1px solid var(--line); background:var(--surface)}
+.ai-msg.user .av{background:linear-gradient(135deg,#0F2340,#1A365D); color:#fff; border-color:#0F2340}
+.ai-msg.ai .av{background:linear-gradient(135deg,#FFF7D6,#FDE68A); color:#78350F; border-color:#FDE68A}
+.ai-msg .bubble{padding:12px 14px; border-radius:16px; font-size:13.2px; line-height:1.65; border:1px solid var(--line); box-shadow:var(--sh-xs); white-space:pre-wrap; overflow-wrap:anywhere}
+.ai-msg.user .bubble{background:linear-gradient(135deg,#0F2340,#1A365D); color:#fff; border-color:#0F2340; border-bottom-right-radius:6px}
+.ai-msg.ai .bubble{background:var(--surface); color:var(--text2); border-bottom-left-radius:6px}
+.ai-msg .meta{font-size:10.5px; color:var(--muted2); margin-top:6px; display:flex; gap:8px; align-items:center}
+.ai-msg.user .meta{justify-content:flex-end}
+.ai-typing{display:inline-flex; gap:4px; align-items:center; padding:8px 0}
+.ai-typing i{width:6px; height:6px; border-radius:50%; background:var(--muted2); animation:typing 1.2s infinite}
+.ai-typing i:nth-child(2){animation-delay:.15s} .ai-typing i:nth-child(3){animation-delay:.3s}
+@keyframes typing{0%,60%,100%{transform:translateY(0); opacity:.5} 30%{transform:translateY(-6px); opacity:1}}
+
+.ai-chat-quick{display:flex; gap:8px; flex-wrap:wrap; padding:10px 14px; border-top:1px solid var(--line2); background:var(--surface2)}
+.ai-chat-quick button{font-size:11.5px; padding:6px 10px; border-radius:999px; border:1px solid var(--line); background:var(--surface); color:var(--text2); cursor:pointer; transition:.16s}
+.ai-chat-quick button:hover{border-color:#C9A86A; background:#FFFBEB; transform:translateY(-1px)}
+
+.ai-chat-input-wrap{padding:12px; border-top:1px solid var(--line); background:var(--surface); display:flex; gap:10px; align-items:flex-end}
+.ai-chat-input{flex:1; min-height:44px; max-height:120px; resize:none; border:1.5px solid var(--line); border-radius:12px; padding:11px 12px; font:500 13.5px/1.6 Inter,sans-serif; background:var(--surface2); color:var(--text); outline:0; transition:.16s}
+.ai-chat-input:focus{border-color:#6B9BD3; background:#fff; box-shadow:0 0 0 4px rgba(59,130,246,.12)}
+.ai-chat-send{width:44px; height:44px; border-radius:12px; border:0; background:linear-gradient(135deg,#0F2340,#1E4565); color:#fff; font-size:16px; cursor:pointer; display:grid; place-items:center; box-shadow:0 6px 14px rgba(15,35,64,.18); transition:.16s; flex:0 0 44px}
+.ai-chat-send:hover{transform:translateY(-1px); box-shadow:0 10px 22px rgba(15,35,64,.22)}
+.ai-chat-send:disabled{opacity:.45; pointer-events:none}
+
+.ai-chat-side-head{display:flex; align-items:center; justify-content:space-between; gap:8px}
+.ai-chat-history{display:flex; flex-direction:column; gap:8px; max-height:260px; overflow-y:auto}
+.ai-chat-history button{ text-align:left; padding:10px 11px; border-radius:11px; border:1px solid var(--line); background:var(--surface2); cursor:pointer; transition:.14s }
+.ai-chat-history button:hover{border-color:#C9A86A; background:#FFFBEB}
+.ai-chat-history b{display:block; font-size:12.5px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.ai-chat-history small{display:block; font-size:11px; color:var(--muted); margin-top:2px}
+
+[data-theme="dark"] .ai-chat-list{background:linear-gradient(180deg, #0C172A 0%, #101E38 100%)}
+[data-theme="dark"] .ai-msg.ai .bubble{background:#132240; border-color:#1E365E; color:#C2D0E0}
+[data-theme="dark"] .ai-mode-tabs{background:#101E38; border-color:#1E365E}
+[data-theme="dark"] .ai-mode-tab:hover:not(.active){background:#132240}
+@media(max-width:1024px){.ai-chat-card{height:68vh}}
 
 </style>
 
@@ -2487,30 +2542,80 @@ function renderAIAssistant(){
   const configured=!!(c.functionUrl&&c.supabaseUrl&&c.anonKey);
   const dotClass = configured ? 'ok' : '';
   const stateText = configured ? 'Konfigurasi tersedia • Siap dipakai' : 'Belum dikonfigurasi';
-  return `${pageTitle('KECERDASAN BUATAN','ARWANA AI Assistant','Asisten untuk analisis alur bisnis, konsistensi perencanaan, pemetaan kinerja dan penyusunan draf. AI memberi rekomendasi; aturan sistem dan keputusan pejabat tetap berlaku.','<button class="btn" data-ai-action="test">◍ Uji Koneksi AI</button> <button class="btn primary" data-ai-action="save-config">✦ Simpan Konfigurasi</button>')}
+  const chatHistory = arwanaAIChatGetHistory();
+  const chatMode = localStorage.getItem('arwana-ai-mode') || 'chat';
+  return `${pageTitle('KECERDASAN BUATAN','ARWANA AI Assistant','Asisten cerdas dengan mode Chat interaktif + Analisis mendalam. AI memberi rekomendasi; aturan sistem dan keputusan pejabat tetap berlaku.','<button class="btn" data-ai-action="test">◍ Uji Koneksi AI</button> <button class="btn" data-ai-action="export-chat">⬇ Ekspor Chat</button> <button class="btn primary" data-ai-action="save-config">✦ Simpan Konfigurasi</button>')}
 <div class="ai-page-wrap">
   <section class="ai-hero">
     <div class="ai-hero-top">
       <span class="ai-chip gold"><span class="dot"></span> AI MELALUI BACKEND SUPABASE</span>
       <span class="ai-chip">🔒 KUNCI API TETAP DI SERVER</span>
-      <span class="ai-chip">⚡ RLS & AUTH AKTIF</span>
+      <span class="ai-chip">💬 MODE CHAT BARU • V7.40</span>
     </div>
-    <h2>Dari data tercatat menjadi langkah kerja yang bisa ditindaklanjuti — cepat, tertelusur, dan aman.</h2>
-    <p>Ajukan analisis dalam bahasa Indonesia. ARWANA hanya mengirim ringkasan terbatas (metadata & relasi perencanaan) ke Edge Function Supabase, lalu menampilkan rekomendasi untuk ditinjau — bukan perubahan otomatis pada data resmi.</p>
+    <h2>Dari data tercatat menjadi percakapan kerja yang bisa ditindaklanjuti — cepat, tertelusur, dan aman.</h2>
+    <p>Chat dengan ARWANA AI seperti ChatGPT: tanya jawab berlanjut, ingat konteks, dan bisa analisis dokumen perencanaan. Semua lewat Edge Function Supabase, API key tetap di server.</p>
     <div class="ai-hero-stats">
-      <div class="ai-hero-stat"><div class="ic">▦</div><div><b>Perencanaan Terpadu</b><small>Renstra • Pohon Kinerja • Cascading</small></div></div>
-      <div class="ai-hero-stat"><div class="ic">⇌</div><div><b>Alur Bisnis</b><small>Aktor • Gate • Status • Audit</small></div></div>
-      <div class="ai-hero-stat"><div class="ic">◍</div><div><b>Pemetaan Kinerja</b><small>Indikator • PK • Rencana Aksi</small></div></div>
+      <div class="ai-hero-stat"><div class="ic">💬</div><div><b>Chat Interaktif</b><small>Percakapan berlanjut & ingat konteks</small></div></div>
+      <div class="ai-hero-stat"><div class="ic">◍</div><div><b>Analisis Mendalam</b><small>Renstra • Pohon Kinerja • Cascading</small></div></div>
+      <div class="ai-hero-stat"><div class="ic">⚡</div><div><b>Respons Cepat</b><small>Streaming & export chat</small></div></div>
     </div>
   </section>
 
+  <div class="ai-mode-tabs">
+    <button class="ai-mode-tab ${chatMode==='chat'?'active':''}" data-ai-mode="chat">💬 Chat AI</button>
+    <button class="ai-mode-tab ${chatMode==='analysis'?'active':''}" data-ai-mode="analysis">◍ Analisis Mendalam</button>
+  </div>
+
   <div class="ai-shell">
     <div class="ai-main-stack">
-      <section class="ai-card glow">
+      <!-- CHAT CARD -->
+      <section class="ai-card ai-chat-card glow" id="aiChatCard" style="display:${chatMode==='chat'?'flex':'none'}">
+        <div class="ai-card-head">
+          <div><h2>💬 ARWANA Chat</h2><p style="font-size:12px">Tanya apa saja tentang agenda, kinerja, alur bisnis. Shift+Enter untuk baris baru.</p></div>
+          <div style="display:flex; gap:6px">
+            <span class="ai-state"><i class="ai-dot ${dotClass}"></i>${stateText}</span>
+            <button class="btn small" data-ai-action="clear-chat" title="Hapus percakapan">🗑 Hapus</button>
+          </div>
+        </div>
+        <div class="ai-chat-list" id="arwanaAIChatList">
+          ${chatHistory.length===0 ? `
+            <div class="ai-chat-empty">
+              <div class="big">✦</div>
+              <h3>Mulai percakapan dengan ARWANA AI</h3>
+              <p>Coba salah satu prompt di bawah atau ketik pertanyaanmu sendiri. AI akan menjawab dengan konteks data perencanaan yang tersedia.</p>
+              <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:8px">
+                <span class="ai-chip gold" style="color:#0F2340; background:#FFFBEB; border-color:#FDE68A">💡 Ingat konteks</span>
+                <span class="ai-chip gold" style="color:#0F2340; background:#FFFBEB; border-color:#FDE68A">🔒 Aman & Tertelusur</span>
+              </div>
+            </div>
+          ` : chatHistory.map(m=>`
+            <div class="ai-msg ${m.role==='user'?'user':'ai'}">
+              <div class="av">${m.role==='user'?'Anda':'AR'}</div>
+              <div style="flex:1; min-width:0">
+                <div class="bubble">${esc(m.content)}</div>
+                <div class="meta">${new Date(m.at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})} ${m.role==='user'?'• Anda':'• ARWANA AI'} ${m.role==='assistant'?`<span style="margin-left:auto; cursor:pointer" data-ai-action="copy-msg" data-msg="${esc(m.content).slice(0,200)}">⎙ Salin</span>`:''}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="ai-chat-quick" id="aiChatQuick">
+          <button data-ai-quick="Ringkaskan agenda dan tindak lanjut minggu ini, sebutkan yang terlambat dan prioritas">📅 Ringkasan minggu ini</button>
+          <button data-ai-quick="Periksa kualitas data pohon kinerja dan cascading, sebutkan masalah utama">🔍 Cek kualitas data</button>
+          <button data-ai-quick="Susun alur bisnis untuk proses persidangan DPRD dari pengajuan sampai risalah">⇌ Alur persidangan</button>
+          <button data-ai-quick="Analisis keterhubungan Renstra dengan PK dan rencana aksi, beri rekomendasi perbaikan">◍ Analisis Renstra</button>
+        </div>
+        <div class="ai-chat-input-wrap">
+          <textarea id="arwanaAIChatInput" class="ai-chat-input" placeholder="Ketik pesan... (Shift+Enter untuk baris baru)" rows="1"></textarea>
+          <button class="ai-chat-send" id="arwanaAIChatSend" title="Kirim (Enter)">➤</button>
+        </div>
+      </section>
+
+      <!-- ANALYSIS CARD -->
+      <section class="ai-card glow" id="aiAnalysisCard" style="display:${chatMode==='analysis'?'block':'none'}">
         <div class="ai-card-head">
           <div>
-            <h2>✦ Ruang kerja AI</h2>
-            <p>Pilih template atau tulis instruksi kustom. AI menjawab dalam konteks data ARWANA yang tersedia.</p>
+            <h2>✦ Ruang kerja Analisis</h2>
+            <p>Pilih template atau tulis instruksi kustom untuk analisis mendalam satu kali.</p>
           </div>
           <span class="ai-state"><i class="ai-dot ${dotClass}"></i>${stateText}</span>
         </div>
@@ -2575,69 +2680,172 @@ Setelah login, coba klik “Uji Koneksi AI” atau pilih salah satu template di 
 
     <div class="ai-side-stack">
       <section class="ai-side-card">
+        <div class="head"><div class="ai-chat-side-head"><h3>💬 Riwayat Chat</h3><button class="btn small" data-ai-action="clear-chat">Hapus</button></div><p>Disimpan lokal di browser, tidak terkirim ke server kecuali saat chat aktif.</p></div>
+        <div class="body">
+          <div class="ai-chat-history" id="arwanaAIChatHistoryList">
+            ${chatHistory.length===0?'<div style="font-size:12px; color:var(--muted); text-align:center; padding:18px">Belum ada riwayat chat.<br>Mulai percakapan di panel Chat AI.</div>':chatHistory.slice(-8).reverse().map(h=>`<button data-ai-action="jump-chat" title="${esc(h.content.slice(0,80))}"><b>${esc(h.content.slice(0,46))}${h.content.length>46?'…':''}</b><small>${h.role==='user'?'Anda':'ARWANA'} • ${new Date(h.at).toLocaleDateString('id-ID')}</small></button>`).join('')}
+          </div>
+        </div>
+      </section>
+
+      <section class="ai-side-card">
         <div class="head">
           <h3>1. Koneksi aplikasi</h3>
-          <p>Gunakan URL proyek dan anon/publishable key Supabase. Jangan masukkan service-role key atau OpenAI key di sini.</p>
+          <p>Gunakan URL proyek dan anon/publishable key Supabase.</p>
         </div>
         <div class="body">
           <div style="display:flex; flex-direction:column; gap:12px">
-            <div><label for="arwanaAISupabaseUrl">URL proyek Supabase</label><input id="arwanaAISupabaseUrl" type="url" placeholder="https://PROJECT_REF.supabase.co" value="${esc(c.supabaseUrl||'')}"></div>
-            <div><label for="arwanaAIAnonKey">Anon / publishable key</label><input id="arwanaAIAnonKey" type="password" autocomplete="off" placeholder="sb_publishable_… atau anon JWT" value="${esc(c.anonKey||'')}"></div>
-            <div><label for="arwanaAIFunctionUrl">URL Edge Function arwana-ai</label><input id="arwanaAIFunctionUrl" type="url" placeholder="https://PROJECT_REF.supabase.co/functions/v1/arwana-ai" value="${esc(c.functionUrl||'')}"></div>
+            <div><label for="arwanaAISupabaseUrl">URL proyek Supabase</label><input id="arwanaAISupabaseUrl" type="url" placeholder="https://PROJECT_REF.supabase.co" value="${esc(c.supabaseUrl||'')}" /></div>
+            <div><label for="arwanaAIAnonKey">Anon / publishable key</label><input id="arwanaAIAnonKey" type="password" autocomplete="off" placeholder="sb_publishable_… atau anon JWT" value="${esc(c.anonKey||'')}" /></div>
+            <div><label for="arwanaAIFunctionUrl">URL Edge Function arwana-ai</label><input id="arwanaAIFunctionUrl" type="url" placeholder="https://PROJECT_REF.supabase.co/functions/v1/arwana-ai" value="${esc(c.functionUrl||'')}" /></div>
           </div>
           <div class="formactions" style="margin-top:14px">
             <button class="btn primary" data-ai-action="save-config">Simpan koneksi</button>
             <button class="btn" data-ai-action="clear-config">Hapus</button>
           </div>
-          <div class="ai-notice" style="margin-top:12px">Disimpan lokal di browser. Sesi login dikelola Supabase Auth SDK (storageKey: arwana-supabase-auth), tidak perlu menempel access token manual.</div>
+          <div class="ai-notice" style="margin-top:12px">Disimpan lokal. Sesi login dikelola Supabase Auth SDK.</div>
         </div>
       </section>
 
       <section class="ai-side-card">
         <div class="head">
           <h3>2. Login Supabase Auth</h3>
-          <p>Akun dibuat & diaktifkan oleh pengelola di Supabase Dashboard. Tidak ada registrasi publik.</p>
+          <p>Akun dibuat & diaktifkan oleh pengelola.</p>
         </div>
         <div class="body">
           <div id="arwanaAIAuthStatus" class="notice" style="margin:0 0 12px; border-radius:11px">Memeriksa sesi…</div>
           <form id="arwanaAILoginForm" class="ai-form">
-            <div><label for="arwanaAIEmail">Email pengguna</label><input id="arwanaAIEmail" type="email" autocomplete="username" required placeholder="nama@instansi.go.id"></div>
-            <div style="margin-top:10px"><label for="arwanaAIPassword">Kata sandi</label><input id="arwanaAIPassword" type="password" autocomplete="current-password" required placeholder="Kata sandi akun Supabase"></div>
+            <div><label for="arwanaAIEmail">Email pengguna</label><input id="arwanaAIEmail" type="email" autocomplete="username" required placeholder="nama@instansi.go.id" /></div>
+            <div style="margin-top:10px"><label for="arwanaAIPassword">Kata sandi</label><input id="arwanaAIPassword" type="password" autocomplete="current-password" required placeholder="Kata sandi akun Supabase" /></div>
             <div class="formactions" style="margin-top:12px">
               <button class="btn primary" type="submit" style="flex:1">Masuk</button>
               <button class="btn" type="button" data-ai-action="logout">Logout</button>
             </div>
           </form>
-          <div class="ai-notice" style="margin-top:12px">Gunakan jaringan internal instansi. Aktifkan RLS untuk tabel produksi; prototipe localStorage bukan DB bersama.</div>
         </div>
       </section>
 
       <section class="ai-side-card">
         <div class="head">
           <h3>3. Konteks yang dikirim ke AI</h3>
-          <p>Transparan & terbatas — hanya yang relevan untuk analisis perencanaan.</p>
+          <p>Transparan & terbatas.</p>
         </div>
         <div class="body">
           <div class="ai-checks">
             <div class="ai-check ok"><div class="tick">✓</div><div><b>Dokumen perencanaan</b><small>Jenis, judul, periode, status, sumber</small></div></div>
             <div class="ai-check ok"><div class="tick">✓</div><div><b>Master kinerja & target</b><small>Nama node, tingkat, relasi induk, target tahun aktif</small></div></div>
-            <div class="ai-check ok"><div class="tick">✓</div><div><b>Relasi kinerja</b><small>Jenis, asal-tujuan, dasar, alasan, status</small></div></div>
-            <div class="ai-check ok"><div class="tick">✓</div><div><b>Agenda & tindak lanjut</b><small>Judul, tenggat, PIC, status ringkas</small></div></div>
-            <div class="ai-check no"><div class="tick">×</div><div><b>Data sensitif dikecualikan</b><small>Tanda tangan, data pegawai detail, anggota DPRD, SPD, file asli — tidak dikirim.</small></div></div>
+            <div class="ai-check ok"><div class="tick">✓</div><div><b>Chat history terbatas</b><small>10 pesan terakhir untuk konteks percakapan</small></div></div>
+            <div class="ai-check no"><div class="tick">×</div><div><b>Data sensitif dikecualikan</b><small>File asli, tanda tangan, data pegawai detail tidak dikirim.</small></div></div>
           </div>
-          <div class="ai-notice" style="margin-top:12px">Hasil terakhir otomatis disimpan lokal sebagai <code>arwana-ai-last-result</code> untuk audit. Hasil bisa disalin & diekspor TXT.</div>
         </div>
       </section>
     </div>
   </div>
 </div>`;}
+
+function arwanaAIChatGetHistory(){try{return JSON.parse(localStorage.getItem('arwana-ai-chat')||'[]')}catch(e){return []}}
+function arwanaAIChatSaveHistory(list){try{localStorage.setItem('arwana-ai-chat', JSON.stringify(list.slice(-100)));}catch(e){}}
+function arwanaAIChatAddMessage(role, content){
+  const list = arwanaAIChatGetHistory();
+  list.push({role, content: String(content||'').slice(0,8000), at: new Date().toISOString()});
+  arwanaAIChatSaveHistory(list);
+  return list;
+}
+function arwanaAIChatClear(){
+  if(confirm('Hapus semua riwayat chat ARWANA AI di browser ini?')){localStorage.removeItem('arwana-ai-chat'); render(); if(typeof showToast==='function') showToast('Riwayat chat dihapus.','success');}
+}
+function arwanaAIChatScrollBottom(){const el=document.getElementById('arwanaAIChatList'); if(el){el.scrollTop = el.scrollHeight;}}
+function arwanaAIChatRenderTyping(){
+  const listEl=document.getElementById('arwanaAIChatList');
+  if(!listEl) return null;
+  const empty = listEl.querySelector('.ai-chat-empty'); if(empty) empty.remove();
+  const wrap=document.createElement('div'); wrap.className='ai-msg ai'; wrap.id='aiTypingIndicator';
+  wrap.innerHTML=`<div class="av">AR</div><div style="flex:1"><div class="bubble"><span class="ai-typing"><i></i><i></i><i></i></span> ARWANA sedang mengetik…</div></div>`;
+  listEl.appendChild(wrap); arwanaAIChatScrollBottom(); return wrap;
+}
+function arwanaAIChatAppendMessage(role, content){
+  const listEl=document.getElementById('arwanaAIChatList');
+  if(!listEl) return;
+  const empty = listEl.querySelector('.ai-chat-empty'); if(empty) empty.remove();
+  const msg=document.createElement('div'); msg.className=`ai-msg ${role==='user'?'user':'ai'}`;
+  const time=new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+  msg.innerHTML=`<div class="av">${role==='user'?'Anda':'AR'}</div><div style="flex:1; min-width:0"><div class="bubble">${esc(content)}</div><div class="meta">${time} ${role==='user'?'• Anda':'• ARWANA AI'}</div></div>`;
+  listEl.appendChild(msg); arwanaAIChatScrollBottom();
+}
+
 function arwanaAIContext(){const safe=(v,max=160)=>String(v??'').slice(0,max);const docs=(state.planningDocuments||[]).slice(0,100).map(d=>({type:safe(d.type),title:safe(d.title||d.name),period:safe(d.period),status:safe(d.status),source:safe(d.source||d.sourceDocument)}));const items=(state.planningItems||[]).slice(0,250).map(x=>({id:safe(x.id,80),name:safe(x.name),level:safe(x.level),parentItemId:safe(x.parentItemId,80),unit:safe(x.unit),annualTargets:x.annualTargets&&typeof x.annualTargets==='object'?Object.fromEntries(Object.entries(x.annualTargets).slice(0,8).map(([k,v])=>[safe(k,12),safe(v,80)])):{}}));const relations=(state.planningRelations||[]).slice(0,300).map(r=>({type:safe(r.type||r.relationType),fromId:safe(r.fromId||r.sourceId,80),toId:safe(r.toId||r.targetId,80),basis:safe(r.basis||r.rationale),status:safe(r.status)}));return {notice:'Ringkasan prototipe ARWANA; jangan menganggap status atau data sebagai bukti resmi tanpa sumber.',activeYear:String(state.settings?.activeYear||2026),documents:docs,planningItems:items,planningRelations:relations,counts:{documents:(state.planningDocuments||[]).length,planningItems:(state.planningItems||[]).length,planningRelations:(state.planningRelations||[]).length}};}
 function arwanaAISetOutput(textValue){const el=document.getElementById('arwanaAIOutput');if(el)el.textContent=textValue;}
 async function arwanaAIRefreshAuth(){const el=document.getElementById('arwanaAIAuthStatus');if(!el)return;const c=arwanaAIConfig();if(!c.supabaseUrl||!c.anonKey){el.textContent='Isi URL proyek dan anon/publishable key, lalu simpan koneksi.';return;}const a=await arwanaAIAuthState();if(a.user){el.textContent='Login aktif: '+a.user.email+' · sesi Supabase tersedia.';}else{el.textContent='Belum login'+(a.error?': '+a.error:'')+'. Gunakan akun yang sudah terdaftar di Supabase Auth.';}}
 async function arwanaAILogin(ev){ev.preventDefault();const client=arwanaAIGetClient();if(!client){arwanaAISetOutput('Simpan URL proyek Supabase dan anon/publishable key terlebih dahulu.');return;}const email=document.getElementById('arwanaAIEmail')?.value.trim();const password=document.getElementById('arwanaAIPassword')?.value;if(!email||!password)return;const btn=document.querySelector('#arwanaAILoginForm button[type="submit"]');if(btn){btn.disabled=true;btn.textContent='Memproses…';}try{const {data,error}=await client.auth.signInWithPassword({email,password});if(error)throw error;if(!data.session)throw new Error('Login belum menghasilkan sesi.');document.getElementById('arwanaAIPassword').value='';await arwanaAIRefreshAuth();arwanaAISetOutput('Login berhasil. Uji koneksi AI atau pilih analisis yang diperlukan.');if(typeof showToast==='function')showToast('Login Supabase berhasil.','success');}catch(e){arwanaAISetOutput('Login gagal: '+(e.message||String(e)));}finally{if(btn){btn.disabled=false;btn.textContent='Login';}}}
 async function arwanaAIInvoke(prompt){const cfg=arwanaAIConfig();const client=arwanaAIGetClient();if(!cfg.functionUrl||!cfg.anonKey||!client){arwanaAISetOutput('Konfigurasi belum lengkap. Isi URL Supabase, anon/publishable key, dan URL Edge Function lalu simpan.');return;}const {data,error:sessionError}=await client.auth.getSession();const session=data?.session;if(sessionError||!session){arwanaAISetOutput('Sesi Supabase tidak tersedia. Login terlebih dahulu menggunakan akun Supabase Auth.');await arwanaAIRefreshAuth();return;}const btn=document.getElementById('arwanaAIRun');if(btn){btn.disabled=true;btn.textContent='Menganalisis…';}arwanaAISetOutput('Mengirim ringkasan perencanaan yang dibatasi ke backend AI…');try{const response=await fetch(cfg.functionUrl,{method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.anonKey,'Authorization':'Bearer '+session.access_token},body:JSON.stringify({prompt,context:arwanaAIContext()})});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||data.message||('HTTP '+response.status));const answer=String(data.answer||data.output||'Backend tidak mengembalikan teks jawaban.');arwanaAISetOutput(answer);try{localStorage.setItem('arwana-ai-last-result',JSON.stringify({at:new Date().toISOString(),prompt,answer,model:data.model||null}));}catch(e){}if(typeof showToast==='function')showToast('Analisis AI selesai. Tinjau hasil sebelum diterapkan.','success');}catch(err){arwanaAISetOutput('Analisis belum berhasil.\n\n'+String(err.message||err)+'\n\nPeriksa deployment function, OPENAI_API_KEY, model, kuota, autentikasi, dan CORS.');}finally{if(btn){btn.disabled=false;btn.textContent='✦ Analisis dengan AI';}}}
-function bindArwanaAI(){const form=document.getElementById('arwanaAIForm');if(form)form.onsubmit=ev=>{ev.preventDefault();arwanaAIInvoke(document.getElementById('arwanaAIPrompt').value.trim());};const login=document.getElementById('arwanaAILoginForm');if(login)login.onsubmit=arwanaAILogin;document.querySelectorAll('[data-ai-prompt]').forEach(b=>b.onclick=()=>{const t=document.getElementById('arwanaAIPrompt');if(t)t.value=b.dataset.aiPrompt;});arwanaAIRefreshAuth();}
-document.addEventListener('click',async e=>{const a=e.target.closest('[data-ai-action]');if(!a)return;const action=a.dataset.aiAction;if(action==='save-config'){const url=document.getElementById('arwanaAIFunctionUrl')?.value.trim()||arwanaAIConfig().functionUrl||'';const supabaseUrl=document.getElementById('arwanaAISupabaseUrl')?.value.trim()||arwanaAIConfig().supabaseUrl||'';const key=document.getElementById('arwanaAIAnonKey')?.value.trim()||arwanaAIConfig().anonKey||'';if(!url||!supabaseUrl||!key){if(typeof showToast==='function')showToast('URL proyek, anon key, dan URL function harus diisi.','error');return;}try{new URL(url);new URL(supabaseUrl);if(!supabaseUrl.startsWith('https://'))throw new Error('URL Supabase harus menggunakan HTTPS.');}catch(err){if(typeof showToast==='function')showToast('Periksa format URL koneksi.','error');return;}arwanaAISaveConfig({functionUrl:url,supabaseUrl,anonKey:key});arwanaAIClient=null;if(typeof showToast==='function')showToast('Konfigurasi koneksi disimpan. Silakan login Supabase.','success');render();return;}if(action==='clear-config'){if(confirm('Hapus konfigurasi koneksi ARWANA AI dari browser ini? Sesi login Supabase akan dihapus juga.')){try{if(arwanaAIClient)await arwanaAIClient.auth.signOut();}catch(_){}localStorage.removeItem('arwana-ai-config');localStorage.removeItem('arwana-supabase-auth');arwanaAIClient=null;render();}return;}if(action==='logout'){const client=arwanaAIGetClient();if(client){await client.auth.signOut();await arwanaAIRefreshAuth();arwanaAISetOutput('Anda telah logout dari Supabase.');if(typeof showToast==='function')showToast('Logout berhasil.','success');}return;}if(action==='test'){arwanaAIInvoke('Jawab singkat: koneksi ARWANA AI aktif. Jangan menganalisis atau mengubah data.');return;}if(action==='copy'){const txt=document.getElementById('arwanaAIOutput')?.textContent||'';try{await navigator.clipboard.writeText(txt);if(typeof showToast==='function')showToast('Hasil disalin.','success');}catch(_){if(typeof showToast==='function')showToast('Salin otomatis tidak tersedia pada konteks ini.','error');}return;}if(action==='download-result'){const txt=document.getElementById('arwanaAIOutput')?.textContent||'';const blob=new Blob([txt],{type:'text/plain;charset=utf-8'});const u=URL.createObjectURL(blob);const link=document.createElement('a');link.href=u;link.download='ARWANA-AI-Hasil-'+new Date().toISOString().slice(0,10)+'.txt';link.click();URL.revokeObjectURL(u);}});
+
+function arwanaAIChatInvoke(promptText){
+  const trimmed = String(promptText||'').trim();
+  if(!trimmed) return;
+  const cfg=arwanaAIConfig(); const client=arwanaAIGetClient();
+  if(!cfg.functionUrl||!cfg.anonKey||!client){ arwanaAIChatAppendMessage('ai','⚠️ Konfigurasi belum lengkap. Isi URL Supabase, anon key, dan URL Edge Function lalu simpan & login.'); return; }
+  arwanaAIChatAddMessage('user', trimmed);
+  arwanaAIChatAppendMessage('user', trimmed);
+  const input=document.getElementById('arwanaAIChatInput'); if(input) input.value='';
+  const typing=arwanaAIChatRenderTyping();
+  // call backend
+  (async()=>{
+    try{
+      const {data, error:sessionError}=await client.auth.getSession(); const session=data?.session;
+      if(sessionError||!session){ if(typing) typing.remove(); arwanaAIChatAppendMessage('ai','Sesi Supabase tidak tersedia. Login terlebih dahulu.'); await arwanaAIRefreshAuth(); return; }
+      const chatHistory = arwanaAIChatGetHistory().slice(-10);
+      const response=await fetch(cfg.functionUrl,{method:'POST',headers:{'Content-Type':'application/json','apikey':cfg.anonKey,'Authorization':'Bearer '+session.access_token},body:JSON.stringify({prompt: trimmed, context: arwanaAIContext(), chat_history: chatHistory, mode:'chat'})});
+      const dataJson=await response.json().catch(()=>({})); if(!response.ok) throw new Error(dataJson.error||dataJson.message||('HTTP '+response.status));
+      const answer=String(dataJson.answer||dataJson.output||'Backend tidak mengembalikan teks jawaban.');
+      if(typing) typing.remove();
+      arwanaAIChatAddMessage('assistant', answer);
+      arwanaAIChatAppendMessage('ai', answer);
+      try{localStorage.setItem('arwana-ai-last-result', JSON.stringify({at:new Date().toISOString(), prompt:trimmed, answer, model:dataJson.model||null, mode:'chat'}));}catch(e){}
+    }catch(err){
+      if(typing) typing.remove();
+      const msg='Chat belum berhasil.\n\n'+String(err.message||err)+'\n\nPeriksa deployment function, OPENAI_API_KEY, model, kuota, autentikasi, dan CORS.';
+      arwanaAIChatAddMessage('assistant', msg);
+      arwanaAIChatAppendMessage('ai', msg);
+    }
+  })();
+}
+
+function bindArwanaAI(){
+  const form=document.getElementById('arwanaAIForm');
+  if(form) form.onsubmit=ev=>{ev.preventDefault(); arwanaAIInvoke(document.getElementById('arwanaAIPrompt').value.trim());};
+  const login=document.getElementById('arwanaAILoginForm');
+  if(login) login.onsubmit=arwanaAILogin;
+  document.querySelectorAll('[data-ai-prompt]').forEach(b=>b.onclick=()=>{
+    const mode=localStorage.getItem('arwana-ai-mode')||'chat';
+    if(mode==='chat'){
+      const t=document.getElementById('arwanaAIChatInput'); if(t){t.value=b.dataset.aiPrompt; t.focus();}
+    } else {
+      const t=document.getElementById('arwanaAIPrompt'); if(t){t.value=b.dataset.aiPrompt; t.focus();}
+    }
+  });
+  // chat input events
+  const chatInput=document.getElementById('arwanaAIChatInput');
+  const chatSend=document.getElementById('arwanaAIChatSend');
+  if(chatInput){
+    chatInput.addEventListener('keydown', e=>{
+      if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); arwanaAIChatInvoke(chatInput.value); }
+    });
+    chatInput.addEventListener('input', ()=>{ chatInput.style.height='auto'; chatInput.style.height=Math.min(chatInput.scrollHeight, 120)+'px'; });
+  }
+  if(chatSend){ chatSend.onclick=()=>{ const inp=document.getElementById('arwanaAIChatInput'); if(inp) arwanaAIChatInvoke(inp.value); }; }
+  document.querySelectorAll('[data-ai-quick]').forEach(b=>b.onclick=()=>{ const t=document.getElementById('arwanaAIChatInput'); if(t){t.value=b.dataset.aiQuick; arwanaAIChatInvoke(t.value);} });
+  document.querySelectorAll('[data-ai-mode]').forEach(btn=>btn.onclick=()=>{
+    const m=btn.dataset.aiMode; localStorage.setItem('arwana-ai-mode', m);
+    document.querySelectorAll('[data-ai-mode]').forEach(x=>x.classList.toggle('active', x.dataset.aiMode===m));
+    const chatCard=document.getElementById('aiChatCard'); const analysisCard=document.getElementById('aiAnalysisCard');
+    if(chatCard) chatCard.style.display = m==='chat'?'flex':'none';
+    if(analysisCard) analysisCard.style.display = m==='analysis'?'block':'none';
+    if(m==='chat') setTimeout(arwanaAIChatScrollBottom, 80);
+  });
+  arwanaAIRefreshAuth();
+  setTimeout(arwanaAIChatScrollBottom, 150);
+}
+
 function render(){document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===page));ensureAspirations();const views={guide:renderGuide,aspirations:renderAspirations,pokir:renderPokir,dashboard:renderDashboard,planninghub:renderPlanningHub,performance:renderPerformanceMapping,actionplans:renderActionPlans,evidence:renderPerformanceEvidence,sakipreadiness:renderSakipReadiness,measurement:renderPerformanceMeasurement,improvements:renderPerformanceImprovements,agenda:renderAgenda,proposals:renderProposals,activity:renderActivity,travel:renderTravel,employees:renderEmployees,members:renderMembers,settings:renderSettings,followups:renderFollowUps,documents:renderDocuments,naskah:renderTataNaskah,org:renderOrg,access:renderAccess,workflow:renderWorkflow,audit:renderAudit,architecture:renderArchitecture,datamodel:renderDataModel,regulation:renderRegulation,roadmap:renderRoadmap,integrationAudit:renderIntegrationAudit,readiness:renderReadiness,knowledge:()=>renderKnowledge(),aiassistant:renderAIAssistant};document.getElementById('main').innerHTML=(views[page]||renderDashboard)();bindDynamic();if(page==='aiassistant')bindArwanaAI();}
 function modal(html){const m=document.getElementById('modal');m.className='';m.innerHTML=`<div style="position:fixed;inset:0;background:#0c1b2bd1;z-index:20;display:flex;align-items:flex-start;justify-content:center;padding:20px 12px;overflow:auto"><div class="card" style="width:min(680px,100%);margin:auto;padding:20px"><div class="sectiontitle"><h2>${html.title}</h2><button class="btn small" data-close>✕ Tutup</button></div>${html.body}</div></div>`;m.querySelector('[data-close]').onclick=closeModal;}
 function closeModal(){const m=document.getElementById('modal');m.className='hide';m.innerHTML='';}
