@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0F2340">
-<title>ARWANA V7.38 — AI Terintegrasi</title>
+<title>ARWANA V7.39 — AI Terintegrasi</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -925,16 +925,231 @@ main:has(.planning-feature-card), main:has(.planning-section-card){--planning-in
 /* Diagram pohon bercabang meniru komposisi contoh pengguna */
 .pk-diagram-card{overflow:hidden}.pk-diag-context-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:14px 0 24px}.pk-diag-context{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:7px;padding:17px 14px;border-radius:15px;min-width:0;border:2px dashed #c6d6e7;background:#f7fbff;color:#1e344c}.pk-diag-context b{font-size:12px}.pk-diag-context span{font-size:12px;line-height:1.45}.pk-diag-context.national{background:#1298d2;border:2px solid #087db4;color:#fff}.pk-diag-context.issue{background:#bce9ff;border-color:#49b7ed}.pk-diag-context.vision{background:#0daec4;border:2px solid #078ca5;color:white}.pk-diag-root-zone{max-width:760px;margin:0 auto 24px;position:relative}.pk-diag-root-caption{text-align:center;font-weight:800;font-size:12px;color:#334155;margin-bottom:8px}.pk-diag-goals{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.pk-diag-goal{border:2px solid #1c2436;border-radius:16px;padding:19px 18px;background:white;display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;box-shadow:0 4px 8px #16203610;min-width:0}.pk-diag-goal b{font-size:12px}.pk-diag-goal strong{font-size:15px;line-height:1.5}.pk-diag-goal small{font-size:11px;color:#5b6474}.pk-diag-level-banner{font-weight:900;font-size:12px;text-align:center;padding:10px;border-radius:12px;margin:12px 0}.pk-diag-banner-ksf{background:#ff7619;color:white;border:2px dashed #a84410}.pk-diag-ksf-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:22px}.pk-diag-ksf-row .ksf{background:#ff781b;color:#fff;border:2px dashed #9b4316;min-height:88px}.pk-diag-opd-zone{background:#e1f5fc;border:3px solid #7bd2f1;border-radius:22px;padding:15px;margin-top:10px}.pk-diag-banner-sasaran{background:#2b9bb2;color:#fff;margin:0 0 14px}.pk-diag-hierarchy{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start}.pk-diag-sasaran-group{min-width:0;display:flex;flex-direction:column;gap:10px}.pk-diag-sasaran-head .pk-diag-node{min-height:100px}.pk-diag-ksf{background:#f6b6bd;border:2px dashed #ef8b96;border-radius:15px;padding:16px 14px;text-align:center;color:#20283a}.pk-diag-ksf b{font-size:12px}.pk-diag-ksf p{font-size:12px;line-height:1.55;margin:8px 0 0}.pk-diag-programs{display:flex;flex-direction:column;gap:12px;min-width:0}.pk-diag-branch{display:flex;flex-direction:column;align-items:stretch;min-width:0;position:relative}.pk-diag-node{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;border-radius:14px;padding:16px 14px;min-width:0;overflow-wrap:anywhere}.pk-diag-node strong{font-size:13px;line-height:1.5}.pk-diag-node small{font-size:11px;line-height:1.5}.pk-diag-label{font-size:11px;font-weight:900}.pk-diag-count{font-size:10px;opacity:.85}.pk-diag-l1{background:#fff;border:2px solid #1d2637;color:#1d2637}.pk-diag-l2{background:#2b9bb2;color:#fff;border:2px solid #2b9bb2}.pk-diag-l3{background:#5a8e2a;color:#fff;border:2px solid #5a8e2a}.pk-diag-l4{background:#2864e8;color:#fff;border:2px solid #2864e8}.pk-diag-l5{background:#f59e0b;color:#4b2c09;border:2px solid #e38a00}.pk-diag-children{display:flex;flex-direction:column;align-items:stretch;gap:12px;margin:12px 0 0 0;padding:12px 0 0 15px;border-left:2px solid #a7c1d5;position:relative}.pk-diag-children:before{content:"";position:absolute;top:0;left:-2px;width:50%;border-top:2px solid #a7c1d5}.pk-diag-children-l4,.pk-diag-children-l5{padding-left:10px}.pk-diag-empty-child{font-size:11px;color:#385b8c;background:#f0f7ff;border:1px solid #c5dcf8;border-radius:12px;padding:13px;text-align:center;line-height:1.5}.pk-diag-branch>.pk-diag-node{margin-bottom:0}@media(max-width:900px){.pk-diag-hierarchy{grid-template-columns:repeat(2,minmax(0,1fr))}.pk-diag-ksf-row{grid-template-columns:1fr 1fr}}@media(max-width:600px){.pk-diag-context-row,.pk-diag-goals,.pk-diag-hierarchy,.pk-diag-ksf-row{grid-template-columns:1fr}.pk-diag-opd-zone{padding:9px}.pk-diag-context-row{gap:8px}.pk-diag-context{padding:12px}.pk-diag-node{padding:13px 10px}.pk-diag-children{padding-left:10px}}
 
-/* ARWANA AI Assistant */
-.ai-shell{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(260px,.8fr);gap:16px;align-items:start}
-.ai-hero{background:linear-gradient(135deg,#0F2340,#1D456D);color:#fff;border-radius:18px;padding:22px;box-shadow:var(--sh-md)}
-.ai-hero h2{margin:5px 0 8px;font-size:24px;line-height:1.25}.ai-hero p{margin:0;color:#dbe7f5;max-width:760px}
-.ai-chip{display:inline-flex;border:1px solid rgba(255,255,255,.28);padding:5px 9px;border-radius:999px;font-size:11px;margin:0 5px 6px 0;color:#f7e9c9}
-.ai-form textarea{min-height:145px;resize:vertical;width:100%;font:inherit}.ai-output{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7;background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:16px;min-height:120px}
-.ai-prompt-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.ai-prompt-grid button{text-align:left;white-space:normal;min-height:56px}
-.ai-state{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700}.ai-dot{width:8px;height:8px;border-radius:50%;background:#d97706;display:inline-block}.ai-dot.ok{background:#059669}.ai-dot.bad{background:#dc2626}
-.ai-small{font-size:12px;color:var(--muted)}.ai-warning{border-left:4px solid #d97706;padding:10px 12px;background:var(--amber-bg);border-radius:8px;font-size:12px}
-@media(max-width:850px){.ai-shell{grid-template-columns:1fr}.ai-prompt-grid{grid-template-columns:1fr}.ai-hero h2{font-size:21px}}
+/* === ARWANA AI Assistant — PREMIUM REDESIGN V7.39 === */
+.ai-page-wrap{ --ai-navy:#0F2340; --ai-navy2:#1A365D; --ai-gold:#C9A86A; --ai-gold2:#DCC191; --ai-radius:22px; }
+
+.ai-hero{
+  position:relative; isolation:isolate; overflow:hidden;
+  background:
+    radial-gradient(700px 400px at 15% -10%, rgba(201,168,106,.18), transparent 60%),
+    radial-gradient(600px 350px at 90% 0%, rgba(59,130,246,.18), transparent 55%),
+    radial-gradient(500px 400px at 50% 120%, rgba(16,185,129,.12), transparent 60%),
+    linear-gradient(135deg, #0B1A33 0%, #0F2340 28%, #17325C 62%, #1E456E 100%);
+  border:1px solid rgba(201,168,106,.18);
+  border-radius:var(--ai-radius);
+  padding:28px 26px 22px;
+  box-shadow:0 20px 50px rgba(7,14,30,.22), inset 0 1px 0 rgba(255,255,255,.08);
+  color:#fff;
+}
+.ai-hero:before{
+  content:""; position:absolute; inset:0; z-index:-1; opacity:.35;
+  background-image:
+    linear-gradient(rgba(255,255,255,.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+  background-size:42px 42px;
+  mask-image:radial-gradient(800px 400px at 30% 0%, black 40%, transparent 80%);
+}
+.ai-hero:after{
+  content:""; position:absolute; right:-80px; top:-80px; width:360px; height:360px; border-radius:50%;
+  background:radial-gradient(circle at 30% 30%, rgba(220,193,145,.35), rgba(201,168,106,.08) 55%, transparent 75%);
+  filter:blur(6px); pointer-events:none;
+}
+.ai-hero-top{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px}
+.ai-chip{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 11px; border-radius:999px;
+  font-size:10.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14);
+  color:#FDE6B8; backdrop-filter:blur(10px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.1);
+}
+.ai-chip.gold{ background:linear-gradient(180deg, rgba(220,193,145,.22), rgba(201,168,106,.16)); border-color:rgba(220,193,145,.35); color:#FFF4D0 }
+.ai-chip .dot{ width:6px; height:6px; border-radius:50%; background:#10B981; box-shadow:0 0 0 3px rgba(16,185,129,.18) }
+.ai-hero h2{
+  margin:6px 0 10px; font-family:"Plus Jakarta Sans",sans-serif;
+  font-size:clamp(22px, 2.6vw, 32px); font-weight:800; line-height:1.15; letter-spacing:-.6px;
+  max-width:760px;
+  background:linear-gradient(180deg, #fff 20%, #D7E7FF 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.ai-hero p{ margin:0; max-width:720px; color:#C8D9EE; font-size:13.5px; line-height:1.7; font-weight:400 }
+.ai-hero-stats{ display:flex; gap:12px; margin-top:18px; flex-wrap:wrap }
+.ai-hero-stat{
+  display:flex; align-items:center; gap:10px;
+  padding:10px 14px; border-radius:12px;
+  background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10);
+  backdrop-filter:blur(8px);
+}
+.ai-hero-stat b{ font-size:12px; color:#fff; display:block; line-height:1.1 }
+.ai-hero-stat small{ font-size:11px; color:#A8C0DC; display:block; margin-top:2px }
+.ai-hero-stat .ic{
+  width:36px; height:36px; border-radius:10px; display:grid; place-items:center;
+  background:linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.04));
+  border:1px solid rgba(255,255,255,.12); font-size:16px;
+}
+
+.ai-shell{
+  display:grid; grid-template-columns:minmax(0,1.65fr) minmax(300px,.85fr);
+  gap:18px; align-items:start; margin-top:18px;
+}
+.ai-main-stack{ display:flex; flex-direction:column; gap:16px }
+
+.ai-card{
+  background:var(--surface); border:1px solid var(--line); border-radius:18px;
+  box-shadow:var(--sh-sm); overflow:hidden; position:relative;
+}
+.ai-card.glow{ box-shadow:0 10px 32px rgba(15,35,64,.08), 0 0 0 1px rgba(201,168,106,.06) inset }
+.ai-card-head{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:16px 18px; border-bottom:1px solid var(--line2);
+  background:linear-gradient(180deg, var(--surface2), var(--surface));
+}
+.ai-card-head h2, .ai-card-head h3{
+  margin:0; font-family:"Plus Jakarta Sans",sans-serif; font-weight:800; letter-spacing:-.3px;
+  font-size:14.5px; color:var(--text); display:flex; align-items:center; gap:9px;
+}
+.ai-card-head p{ margin:2px 0 0; font-size:12px; color:var(--muted) }
+.ai-card-body{ padding:18px }
+
+.ai-state{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:6px 10px; border-radius:999px;
+  font-size:11.5px; font-weight:700; letter-spacing:.01em;
+  background:var(--slate-100); border:1px solid var(--line); color:var(--text2);
+}
+.ai-dot{ width:8px; height:8px; border-radius:50%; background:#F59E0B; display:inline-block; box-shadow:0 0 0 3px rgba(245,158,11,.15) }
+.ai-dot.ok{ background:#10B981; box-shadow:0 0 0 3px rgba(16,185,129,.16) }
+.ai-dot.bad{ background:#EF4444; box-shadow:0 0 0 3px rgba(239,68,68,.15) }
+
+.ai-prompt-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px }
+.ai-prompt{
+  position:relative; text-align:left; cursor:pointer;
+  padding:14px 13px 13px 13px; border-radius:14px;
+  border:1px solid var(--line); background:linear-gradient(180deg, var(--surface2), var(--surface));
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  min-height:84px; overflow:hidden;
+}
+.ai-prompt:hover{ transform:translateY(-2px); border-color:#C9A86A; box-shadow:0 10px 24px rgba(15,35,64,.08) }
+.ai-prompt b{ display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700; color:var(--text); margin-bottom:4px; font-family:"Plus Jakarta Sans",sans-serif }
+.ai-prompt b i{
+  width:28px; height:28px; border-radius:9px; display:grid; place-items:center;
+  background:linear-gradient(180deg, #FFFBEB, #FFF1C6); border:1px solid #FDE68A; color:#92400E; font-size:14px; font-style:normal; flex:0 0 28px;
+}
+.ai-prompt span{ display:block; font-size:11.5px; line-height:1.5; color:var(--muted) }
+.ai-prompt:after{
+  content:""; position:absolute; right:10px; top:10px; width:18px; height:18px; border-radius:50%;
+  background:var(--slate-100); border:1px solid var(--line);
+  background-image:url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M4 2.5L7.5 6L4 9.5' stroke='%2394A3B8' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:center; opacity:.9;
+}
+
+.ai-form{ display:flex; flex-direction:column; gap:12px }
+.ai-form label{ font-size:11.5px; font-weight:700; color:var(--text2); letter-spacing:.01em; font-family:"Plus Jakarta Sans",sans-serif }
+.ai-textarea-wrap{
+  position:relative; border-radius:14px; border:1.5px solid var(--line);
+  background:var(--surface2); box-shadow:inset 0 1px 2px rgba(15,35,64,.04);
+  transition:border-color .18s, box-shadow .18s, background .18s; overflow:hidden;
+}
+.ai-textarea-wrap:focus-within{ border-color:#8BB2E0; background:var(--surface); box-shadow:0 0 0 4px rgba(59,130,246,.10) }
+.ai-form textarea{
+  width:100%; min-height:148px; resize:vertical; border:0; outline:0; background:transparent;
+  padding:14px 14px 36px; font:500 13.5px/1.7 Inter,system-ui,sans-serif; color:var(--text);
+}
+.ai-textarea-meta{
+  position:absolute; left:0; right:0; bottom:0; height:34px;
+  display:flex; align-items:center; justify-content:space-between; gap:8px;
+  padding:0 12px; border-top:1px solid var(--line2);
+  background:color-mix(in srgb, var(--surface) 85%, var(--surface2));
+  font-size:11px; color:var(--muted);
+}
+.ai-textarea-meta .count{ font-variant-numeric:tabular-nums }
+
+.ai-output-wrap{
+  border:1px solid var(--line); border-radius:14px; background:var(--surface2);
+  overflow:hidden; box-shadow:var(--sh-xs);
+}
+.ai-output-head{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:11px 12px; border-bottom:1px solid var(--line2); background:var(--surface);
+}
+.ai-output-head b{ font-size:12.5px; font-weight:700; color:var(--text); display:flex; align-items:center; gap:7px }
+.ai-output-head b:before{
+  content:""; width:8px; height:8px; border-radius:50%; background:#C9A86A; box-shadow:0 0 0 3px rgba(201,168,106,.15);
+}
+.ai-output{
+  white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.75; font-size:13px;
+  padding:18px; min-height:148px; max-height:560px; overflow:auto;
+  color:var(--text2); background:linear-gradient(180deg, var(--surface2), var(--surface));
+}
+.ai-output:empty:before{ content:"Hasil analisis akan tampil di sini…"; color:var(--muted2); font-style:italic }
+
+.ai-warning{
+  display:flex; gap:10px; padding:12px 13px; border-radius:12px;
+  border:1px solid var(--amber-line); background:var(--amber-bg);
+  font-size:12px; line-height:1.6; color:#78350F;
+}
+.ai-warning b{ font-family:"Plus Jakarta Sans",sans-serif }
+.ai-warning .ic{ width:28px; height:28px; border-radius:8px; background:#FFFBEB; border:1px solid #FDE68A; display:grid; place-items:center; flex:0 0 28px; font-size:14px }
+
+.ai-side-stack{ display:flex; flex-direction:column; gap:14px; position:sticky; top:86px }
+.ai-side-card{ border-radius:18px; border:1px solid var(--line); background:var(--surface); box-shadow:var(--sh-xs); overflow:hidden }
+.ai-side-card .head{ padding:14px 16px; border-bottom:1px solid var(--line2); background:linear-gradient(180deg, var(--surface2), var(--surface)) }
+.ai-side-card .head h2, .ai-side-card .head h3{ margin:0; font-size:13.5px; font-weight:800; font-family:"Plus Jakarta Sans",sans-serif; color:var(--text); letter-spacing:-.2px }
+.ai-side-card .head p{ margin:3px 0 0; font-size:11.5px; color:var(--muted); line-height:1.5 }
+.ai-side-card .body{ padding:16px }
+.ai-side-card label{ font-size:11px; font-weight:700; color:var(--text2); display:block; margin:0 0 6px }
+.ai-side-card input{
+  width:100%; padding:10px 12px; border-radius:11px; border:1.5px solid var(--line);
+  background:var(--surface2); color:var(--text); font:500 12.5px/1.5 Inter,sans-serif;
+  transition:border-color .18s, box-shadow .18s, background .18s;
+}
+.ai-side-card input:focus{ outline:0; border-color:#8BB2E0; background:var(--surface); box-shadow:0 0 0 4px rgba(59,130,246,.10) }
+
+.ai-checks{ display:flex; flex-direction:column; gap:9px; margin-top:10px }
+.ai-check{
+  display:flex; gap:10px; padding:11px 12px; border-radius:12px;
+  border:1px solid var(--line); background:var(--surface2); transition:border-color .16s;
+}
+.ai-check:hover{ border-color:#CBD5E1 }
+.ai-check .tick{
+  width:24px; height:24px; border-radius:8px; display:grid; place-items:center; flex:0 0 24px;
+  font-size:12px; font-weight:800; border:1px solid;
+}
+.ai-check.ok .tick{ background:#ECFDF5; border-color:#A7F3D0; color:#047857 }
+.ai-check.no .tick{ background:#FEF2F2; border-color:#FECACA; color:#B91C1C }
+.ai-check b{ display:block; font-size:12px; font-weight:700; color:var(--text) }
+.ai-check small{ display:block; font-size:11px; color:var(--muted); line-height:1.45; margin-top:2px }
+
+.ai-notice{
+  padding:11px 12px; border-radius:11px; border:1px dashed var(--line);
+  background:var(--slate-50); color:var(--muted); font-size:11.5px; line-height:1.6;
+}
+.ai-small{ font-size:11.5px; color:var(--muted); line-height:1.6 }
+
+.formactions.ai-actions{
+  display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
+  padding:12px 0 0; border-top:1px solid var(--line2); margin-top:2px; background:transparent;
+}
+
+[data-theme="dark"] .ai-hero{ border-color:rgba(201,168,106,.20); box-shadow:0 20px 50px rgba(0,0,0,.35) }
+[data-theme="dark"] .ai-prompt{ background:linear-gradient(180deg, #132240, #101E38); border-color:#1E365E }
+[data-theme="dark"] .ai-prompt:hover{ border-color:#C9A86A; box-shadow:0 10px 24px rgba(0,0,0,.22) }
+[data-theme="dark"] .ai-prompt b{ color:#E6EDF7 }
+[data-theme="dark"] .ai-prompt b i{ background:linear-gradient(180deg, #2A2414, #1E1810); border-color:#3A3020; color:#EAD9B8 }
+[data-theme="dark"] .ai-prompt:after{ background-color:#132240; border-color:#1E365E }
+[data-theme="dark"] .ai-textarea-wrap{ background:#101E38; border-color:#1E365E }
+[data-theme="dark"] .ai-textarea-wrap:focus-within{ background:#132240; border-color:#2A4A75 }
+[data-theme="dark"] .ai-output{ background:linear-gradient(180deg, #101E38, #0F1A2E) }
+[data-theme="dark"] .ai-check{ background:#101E38; border-color:#1E365E }
+[data-theme="dark"] .ai-warning{ background:#221A0A; border-color:#78350F; color:#FCD34D }
+[data-theme="dark"] .ai-notice{ background:#101E38; border-color:#1E365E; color:#8CA0BC }
+
+@media(max-width:980px){ .ai-shell{ grid-template-columns:1fr } .ai-side-stack{ position:static } .ai-hero{ padding:20px } .ai-hero-stats{ gap:8px } }
+@media(max-width:640px){ .ai-prompt-grid{ grid-template-columns:1fr } .ai-hero h2{ font-size:21px } }
+
+@keyframes aiFadeUp{ from{ opacity:0; transform:translateY(10px) } to{ opacity:1; transform:translateY(0) } }
+.ai-page-wrap > *{ animation:aiFadeUp .42s cubic-bezier(.2,.8,.2,1) both }
+.ai-page-wrap > *:nth-child(2){ animation-delay:.06s } .ai-page-wrap > *:nth-child(3){ animation-delay:.12s }
 
 </style>
 
@@ -2267,7 +2482,155 @@ function arwanaAISaveConfig(cfg){localStorage.setItem('arwana-ai-config',JSON.st
 let arwanaAIClient=null;
 function arwanaAIGetClient(){const c=arwanaAIConfig();if(!c.supabaseUrl||!c.anonKey)return null;if(!window.supabase?.createClient)return null;if(!arwanaAIClient||arwanaAIClient.__arwanaUrl!==c.supabaseUrl||arwanaAIClient.__arwanaKey!==c.anonKey){arwanaAIClient=window.supabase.createClient(c.supabaseUrl,c.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'arwana-supabase-auth'}});arwanaAIClient.__arwanaUrl=c.supabaseUrl;arwanaAIClient.__arwanaKey=c.anonKey;}return arwanaAIClient;}
 async function arwanaAIAuthState(){const client=arwanaAIGetClient();if(!client)return {user:null,error:'Isi URL proyek Supabase dan anon/publishable key.'};try{const {data,error}=await client.auth.getSession();if(error)throw error;return {user:data.session?.user||null,session:data.session||null};}catch(e){return {user:null,error:e.message||String(e)}}}
-function renderAIAssistant(){const c=arwanaAIConfig();const configured=!!(c.functionUrl&&c.supabaseUrl&&c.anonKey);return `${pageTitle('KECERDASAN BUATAN','ARWANA AI Assistant','Asisten untuk analisis alur bisnis, konsistensi perencanaan, pemetaan kinerja dan penyusunan draf. AI memberi rekomendasi; aturan sistem dan keputusan pejabat tetap berlaku.','<button class="btn" data-ai-action="test">Uji Koneksi AI</button> <button class="btn primary" data-ai-action="save-config">Simpan Konfigurasi</button>')}<section class="ai-hero"><span class="ai-chip">AI MELALUI BACKEND SUPABASE</span><span class="ai-chip">KUNCI API TETAP DI SERVER</span><h2>Dari data tercatat menjadi langkah kerja yang bisa ditindaklanjuti.</h2><p>Ajukan analisis dalam bahasa Indonesia. ARWANA mengirim ringkasan data perencanaan yang dibatasi, lalu menampilkan hasil sebagai rekomendasi untuk ditinjau—bukan perubahan otomatis pada data resmi.</p></section><div class="ai-shell" style="margin-top:16px"><section class="card"><div class="sectiontitle"><div><h2>Ruang kerja AI</h2><p class="muted">Pilih contoh perintah atau tulis kebutuhan sendiri.</p></div><span class="ai-state"><i class="ai-dot ${configured?'ok':''}"></i>${configured?'Konfigurasi tersedia':'Belum dikonfigurasi'}</span></div><div class="ai-prompt-grid"><button class="btn" data-ai-prompt="Analisis keterhubungan Renstra, pohon kinerja, cascading, crosscutting, PK, dan rencana aksi. Urutkan masalah paling penting dan beri rujukan ke data yang tersedia.">✦ Analisis Perencanaan Terpadu</button><button class="btn" data-ai-prompt="Susun alur bisnis untuk proses Sekretariat DPRD: identifikasi aktor, pemicu, input, tahapan, keputusan/gate, keluaran, status, jejak audit, pengecualian, dan prasyarat. Bedakan aturan yang sudah ada dengan usulan.">⇌ Susun Alur Bisnis</button><button class="btn" data-ai-prompt="Periksa struktur pohon kinerja dan cascading. Cari parent yang tidak tepat, indikator tanpa target tahun aktif, hubungan tanpa dasar/alasan, dan potensi duplikasi. Jangan mengubah data.">⌕ Periksa Kualitas Data</button><button class="btn" data-ai-prompt="Susun daftar prioritas penyelesaian Perencanaan Terpadu berdasarkan data yang tersedia. Untuk tiap langkah jelaskan sumber data, keluaran, prasyarat, risiko, dan validasi yang dibutuhkan.">☷ Susun Rencana Penyelesaian</button><button class="btn" data-ai-prompt="Buat rancangan dokumen panduan alur bisnis untuk modul yang paling membutuhkan dokumentasi berdasarkan konteks. Sertakan aktor, alur normal, pengecualian, status, keluaran, dan kontrol.">▤ Susun Panduan Modul</button></div><form id="arwanaAIForm" class="ai-form" style="margin-top:14px"><label for="arwanaAIPrompt">Instruksi untuk AI</label><textarea id="arwanaAIPrompt" maxlength="8000" required placeholder="Contoh: Periksa hubungan sasaran Renstra dengan pohon kinerja dan cascading. Tunjukkan yang sudah ada, yang kurang, dan langkah perbaikannya."></textarea><div class="formactions"><span class="ai-small">Konteks yang dikirim: metadata dokumen, data kinerja, target dan relasi terpilih; data sensitif operasional dikecualikan.</span><button class="btn primary" id="arwanaAIRun" type="submit">✦ Analisis dengan AI</button></div></form><div style="margin-top:16px"><div class="sectiontitle"><h3>Hasil analisis</h3><button class="btn small" data-ai-action="copy">Salin hasil</button><button class="btn small" data-ai-action="download-result">Ekspor TXT</button></div><div class="ai-output" id="arwanaAIOutput" aria-live="polite">Konfigurasikan Supabase dan login menggunakan akun yang sudah dibuat di Supabase Auth. OpenAI API key hanya disimpan sebagai secret di Supabase.</div></div><div class="ai-warning" style="margin-top:12px"><b>Kontrol:</b> hasil AI tidak langsung menulis ke master data, mengubah status resmi, menetapkan nilai SAKIP, atau menggantikan pengesahan. Terapkan rekomendasi secara terkontrol setelah ditinjau.</div></section><aside><section class="card"><h2>1. Koneksi aplikasi</h2><p class="muted">Gunakan URL proyek dan anon/publishable key Supabase. Jangan masukkan service-role key atau OpenAI API key di sini.</p><label for="arwanaAISupabaseUrl">URL proyek Supabase</label><input id="arwanaAISupabaseUrl" type="url" placeholder="https://PROJECT_REF.supabase.co" value="${esc(c.supabaseUrl||'')}"><label for="arwanaAIAnonKey" style="margin-top:12px">Anon / publishable key</label><input id="arwanaAIAnonKey" type="password" autocomplete="off" placeholder="sb_publishable_… atau anon JWT" value="${esc(c.anonKey||'')}"><label for="arwanaAIFunctionUrl" style="margin-top:12px">URL Edge Function arwana-ai</label><input id="arwanaAIFunctionUrl" type="url" placeholder="https://PROJECT_REF.supabase.co/functions/v1/arwana-ai" value="${esc(c.functionUrl||'')}"><div class="formactions"><button class="btn primary" data-ai-action="save-config">Simpan koneksi</button><button class="btn" data-ai-action="clear-config">Hapus koneksi</button></div><p class="ai-small">URL/key publik disimpan di browser. Sesi login dikelola oleh Supabase Auth SDK, tidak perlu menempel access token manual.</p></section><section class="card"><h2>2. Login Supabase</h2><div id="arwanaAIAuthStatus" class="notice">Memeriksa sesi…</div><form id="arwanaAILoginForm" class="ai-form"><label for="arwanaAIEmail">Email pengguna</label><input id="arwanaAIEmail" type="email" autocomplete="username" required placeholder="nama@instansi.go.id"><label for="arwanaAIPassword" style="margin-top:10px">Kata sandi</label><input id="arwanaAIPassword" type="password" autocomplete="current-password" required placeholder="Kata sandi akun Supabase"><div class="formactions"><button class="btn primary" type="submit">Login</button><button class="btn" type="button" data-ai-action="logout">Logout</button></div></form><p class="ai-small">Akun harus dibuat dan diaktifkan di Supabase Auth oleh pengelola. Tidak ada pendaftaran publik otomatis.</p></section><section class="card"><h3>Yang dikirim ke AI</h3><div class="checkrow"><span>✓</span><div><b>Dokumen perencanaan</b><small>Jenis, judul, periode, status, sumber</small></div></div><div class="checkrow"><span>✓</span><div><b>Master kinerja & target</b><small>Nama node, tingkat, relasi induk, target tahun aktif</small></div></div><div class="checkrow"><span>✓</span><div><b>Relasi kinerja</b><small>Jenis, asal-tujuan, dasar, alasan, status</small></div></div><div class="checkrow"><span>×</span><div><b>Data sensitif operasional</b><small>Tanda tangan, data pegawai, anggota DPRD, perjalanan dinas tidak dikirim.</small></div></div><div class="notice">Gunakan akun yang sesuai kebijakan instansi. Aktifkan RLS untuk tabel produksi; prototipe localStorage bukan database bersama.</div></section></aside></div>`;}
+function renderAIAssistant(){
+  const c=arwanaAIConfig();
+  const configured=!!(c.functionUrl&&c.supabaseUrl&&c.anonKey);
+  const dotClass = configured ? 'ok' : '';
+  const stateText = configured ? 'Konfigurasi tersedia • Siap dipakai' : 'Belum dikonfigurasi';
+  return `${pageTitle('KECERDASAN BUATAN','ARWANA AI Assistant','Asisten untuk analisis alur bisnis, konsistensi perencanaan, pemetaan kinerja dan penyusunan draf. AI memberi rekomendasi; aturan sistem dan keputusan pejabat tetap berlaku.','<button class="btn" data-ai-action="test">◍ Uji Koneksi AI</button> <button class="btn primary" data-ai-action="save-config">✦ Simpan Konfigurasi</button>')}
+<div class="ai-page-wrap">
+  <section class="ai-hero">
+    <div class="ai-hero-top">
+      <span class="ai-chip gold"><span class="dot"></span> AI MELALUI BACKEND SUPABASE</span>
+      <span class="ai-chip">🔒 KUNCI API TETAP DI SERVER</span>
+      <span class="ai-chip">⚡ RLS & AUTH AKTIF</span>
+    </div>
+    <h2>Dari data tercatat menjadi langkah kerja yang bisa ditindaklanjuti — cepat, tertelusur, dan aman.</h2>
+    <p>Ajukan analisis dalam bahasa Indonesia. ARWANA hanya mengirim ringkasan terbatas (metadata & relasi perencanaan) ke Edge Function Supabase, lalu menampilkan rekomendasi untuk ditinjau — bukan perubahan otomatis pada data resmi.</p>
+    <div class="ai-hero-stats">
+      <div class="ai-hero-stat"><div class="ic">▦</div><div><b>Perencanaan Terpadu</b><small>Renstra • Pohon Kinerja • Cascading</small></div></div>
+      <div class="ai-hero-stat"><div class="ic">⇌</div><div><b>Alur Bisnis</b><small>Aktor • Gate • Status • Audit</small></div></div>
+      <div class="ai-hero-stat"><div class="ic">◍</div><div><b>Pemetaan Kinerja</b><small>Indikator • PK • Rencana Aksi</small></div></div>
+    </div>
+  </section>
+
+  <div class="ai-shell">
+    <div class="ai-main-stack">
+      <section class="ai-card glow">
+        <div class="ai-card-head">
+          <div>
+            <h2>✦ Ruang kerja AI</h2>
+            <p>Pilih template atau tulis instruksi kustom. AI menjawab dalam konteks data ARWANA yang tersedia.</p>
+          </div>
+          <span class="ai-state"><i class="ai-dot ${dotClass}"></i>${stateText}</span>
+        </div>
+        <div class="ai-card-body">
+          <div class="ai-prompt-grid">
+            <button class="ai-prompt" data-ai-prompt="Analisis keterhubungan Renstra, pohon kinerja, cascading, crosscutting, PK, dan rencana aksi. Urutkan masalah paling penting dan beri rujukan ke data yang tersedia.">
+              <b><i>◍</i> Analisis Perencanaan Terpadu</b><span>Temukan gap Renstra → Pohon Kinerja → Cascading → PK, urutkan prioritas perbaikan.</span>
+            </button>
+            <button class="ai-prompt" data-ai-prompt="Susun alur bisnis untuk proses Sekretariat DPRD: identifikasi aktor, pemicu, input, tahapan, keputusan/gate, keluaran, status, jejak audit, pengecualian, dan prasyarat. Bedakan aturan yang sudah ada dengan usulan.">
+              <b><i>⇌</i> Susun Alur Bisnis</b><span>Rancang SOP end-to-end: aktor, input, gate keputusan, output, dan kontrol audit.</span>
+            </button>
+            <button class="ai-prompt" data-ai-prompt="Periksa struktur pohon kinerja dan cascading. Cari parent yang tidak tepat, indikator tanpa target tahun aktif, hubungan tanpa dasar/alasan, dan potensi duplikasi. Jangan mengubah data.">
+              <b><i>⌕</i> Periksa Kualitas Data</b><span>Deteksi parent salah, indikator tanpa target, relasi tanpa dasar, dan duplikasi.</span>
+            </button>
+            <button class="ai-prompt" data-ai-prompt="Susun daftar prioritas penyelesaian Perencanaan Terpadu berdasarkan data yang tersedia. Untuk tiap langkah jelaskan sumber data, keluaran, prasyarat, risiko, dan validasi yang dibutuhkan.">
+              <b><i>☷</i> Susun Rencana Penyelesaian</b><span>Backlog prioritas dengan prasyarat, risiko, dan validasi yang dibutuhkan.</span>
+            </button>
+            <button class="ai-prompt" data-ai-prompt="Buat rancangan dokumen panduan alur bisnis untuk modul yang paling membutuhkan dokumentasi berdasarkan konteks. Sertakan aktor, alur normal, pengecualian, status, keluaran, dan kontrol.">
+              <b><i>▤</i> Susun Panduan Modul</b><span>Generate draft panduan: alur normal, pengecualian, status, dan kontrol.</span>
+            </button>
+            <button class="ai-prompt" data-ai-prompt="Analisis agenda, pelaksanaan, dan tindak lanjut minggu ini. Buat ringkasan eksekutif, daftar risiko tenggat, dan rekomendasi tindak lanjut yang harus didahulukan.">
+              <b><i>◷</i> Ringkasan Mingguan</b><span>Ringkasan agenda • risiko keterlambatan • prioritas tindak lanjut minggu ini.</span>
+            </button>
+          </div>
+
+          <form id="arwanaAIForm" class="ai-form" style="margin-top:16px">
+            <label for="arwanaAIPrompt">Instruksi untuk AI — tulis dalam bahasa Indonesia</label>
+            <div class="ai-textarea-wrap">
+              <textarea id="arwanaAIPrompt" maxlength="8000" required placeholder="Contoh: Periksa hubungan sasaran Renstra dengan pohon kinerja dan cascading. Tunjukkan yang sudah ada, yang kurang, dan langkah perbaikannya."></textarea>
+              <div class="ai-textarea-meta">
+                <span>🛈 Konteks otomatis: metadata dokumen, kinerja, target & relasi terpilih — data sensitif dikecualikan</span>
+                <span class="count">maks 8000 karakter</span>
+              </div>
+            </div>
+            <div class="formactions ai-actions">
+              <span class="ai-small">Tip: gunakan template di atas untuk hasil lebih konsisten. AI tidak menulis langsung ke database.</span>
+              <button class="btn primary" id="arwanaAIRun" type="submit" style="min-height:42px; padding:0 18px; border-radius:11px; font-weight:700">✦ Analisis dengan AI</button>
+            </div>
+          </form>
+
+          <div style="margin-top:18px">
+            <div class="ai-output-wrap">
+              <div class="ai-output-head">
+                <b>Hasil analisis AI</b>
+                <div style="display:flex; gap:6px">
+                  <button class="btn small" data-ai-action="copy">⎙ Salin</button>
+                  <button class="btn small" data-ai-action="download-result">⬇ Ekspor TXT</button>
+                </div>
+              </div>
+              <div class="ai-output" id="arwanaAIOutput" aria-live="polite">Konfigurasikan Supabase dan login menggunakan akun yang sudah dibuat di Supabase Auth. OpenAI API key hanya disimpan sebagai secret di Supabase.
+
+Setelah login, coba klik “Uji Koneksi AI” atau pilih salah satu template di atas.</div>
+            </div>
+            <div class="ai-warning" style="margin-top:12px">
+              <div class="ic">⚠</div>
+              <div><b>Kontrol & Etika:</b> hasil AI tidak langsung menulis ke master data, mengubah status resmi, menetapkan nilai SAKIP, atau menggantikan pengesahan. Terapkan rekomendasi secara terkontrol setelah ditinjau pejabat berwenang.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="ai-side-stack">
+      <section class="ai-side-card">
+        <div class="head">
+          <h3>1. Koneksi aplikasi</h3>
+          <p>Gunakan URL proyek dan anon/publishable key Supabase. Jangan masukkan service-role key atau OpenAI key di sini.</p>
+        </div>
+        <div class="body">
+          <div style="display:flex; flex-direction:column; gap:12px">
+            <div><label for="arwanaAISupabaseUrl">URL proyek Supabase</label><input id="arwanaAISupabaseUrl" type="url" placeholder="https://PROJECT_REF.supabase.co" value="${esc(c.supabaseUrl||'')}"></div>
+            <div><label for="arwanaAIAnonKey">Anon / publishable key</label><input id="arwanaAIAnonKey" type="password" autocomplete="off" placeholder="sb_publishable_… atau anon JWT" value="${esc(c.anonKey||'')}"></div>
+            <div><label for="arwanaAIFunctionUrl">URL Edge Function arwana-ai</label><input id="arwanaAIFunctionUrl" type="url" placeholder="https://PROJECT_REF.supabase.co/functions/v1/arwana-ai" value="${esc(c.functionUrl||'')}"></div>
+          </div>
+          <div class="formactions" style="margin-top:14px">
+            <button class="btn primary" data-ai-action="save-config">Simpan koneksi</button>
+            <button class="btn" data-ai-action="clear-config">Hapus</button>
+          </div>
+          <div class="ai-notice" style="margin-top:12px">Disimpan lokal di browser. Sesi login dikelola Supabase Auth SDK (storageKey: arwana-supabase-auth), tidak perlu menempel access token manual.</div>
+        </div>
+      </section>
+
+      <section class="ai-side-card">
+        <div class="head">
+          <h3>2. Login Supabase Auth</h3>
+          <p>Akun dibuat & diaktifkan oleh pengelola di Supabase Dashboard. Tidak ada registrasi publik.</p>
+        </div>
+        <div class="body">
+          <div id="arwanaAIAuthStatus" class="notice" style="margin:0 0 12px; border-radius:11px">Memeriksa sesi…</div>
+          <form id="arwanaAILoginForm" class="ai-form">
+            <div><label for="arwanaAIEmail">Email pengguna</label><input id="arwanaAIEmail" type="email" autocomplete="username" required placeholder="nama@instansi.go.id"></div>
+            <div style="margin-top:10px"><label for="arwanaAIPassword">Kata sandi</label><input id="arwanaAIPassword" type="password" autocomplete="current-password" required placeholder="Kata sandi akun Supabase"></div>
+            <div class="formactions" style="margin-top:12px">
+              <button class="btn primary" type="submit" style="flex:1">Masuk</button>
+              <button class="btn" type="button" data-ai-action="logout">Logout</button>
+            </div>
+          </form>
+          <div class="ai-notice" style="margin-top:12px">Gunakan jaringan internal instansi. Aktifkan RLS untuk tabel produksi; prototipe localStorage bukan DB bersama.</div>
+        </div>
+      </section>
+
+      <section class="ai-side-card">
+        <div class="head">
+          <h3>3. Konteks yang dikirim ke AI</h3>
+          <p>Transparan & terbatas — hanya yang relevan untuk analisis perencanaan.</p>
+        </div>
+        <div class="body">
+          <div class="ai-checks">
+            <div class="ai-check ok"><div class="tick">✓</div><div><b>Dokumen perencanaan</b><small>Jenis, judul, periode, status, sumber</small></div></div>
+            <div class="ai-check ok"><div class="tick">✓</div><div><b>Master kinerja & target</b><small>Nama node, tingkat, relasi induk, target tahun aktif</small></div></div>
+            <div class="ai-check ok"><div class="tick">✓</div><div><b>Relasi kinerja</b><small>Jenis, asal-tujuan, dasar, alasan, status</small></div></div>
+            <div class="ai-check ok"><div class="tick">✓</div><div><b>Agenda & tindak lanjut</b><small>Judul, tenggat, PIC, status ringkas</small></div></div>
+            <div class="ai-check no"><div class="tick">×</div><div><b>Data sensitif dikecualikan</b><small>Tanda tangan, data pegawai detail, anggota DPRD, SPD, file asli — tidak dikirim.</small></div></div>
+          </div>
+          <div class="ai-notice" style="margin-top:12px">Hasil terakhir otomatis disimpan lokal sebagai <code>arwana-ai-last-result</code> untuk audit. Hasil bisa disalin & diekspor TXT.</div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>`;}
 function arwanaAIContext(){const safe=(v,max=160)=>String(v??'').slice(0,max);const docs=(state.planningDocuments||[]).slice(0,100).map(d=>({type:safe(d.type),title:safe(d.title||d.name),period:safe(d.period),status:safe(d.status),source:safe(d.source||d.sourceDocument)}));const items=(state.planningItems||[]).slice(0,250).map(x=>({id:safe(x.id,80),name:safe(x.name),level:safe(x.level),parentItemId:safe(x.parentItemId,80),unit:safe(x.unit),annualTargets:x.annualTargets&&typeof x.annualTargets==='object'?Object.fromEntries(Object.entries(x.annualTargets).slice(0,8).map(([k,v])=>[safe(k,12),safe(v,80)])):{}}));const relations=(state.planningRelations||[]).slice(0,300).map(r=>({type:safe(r.type||r.relationType),fromId:safe(r.fromId||r.sourceId,80),toId:safe(r.toId||r.targetId,80),basis:safe(r.basis||r.rationale),status:safe(r.status)}));return {notice:'Ringkasan prototipe ARWANA; jangan menganggap status atau data sebagai bukti resmi tanpa sumber.',activeYear:String(state.settings?.activeYear||2026),documents:docs,planningItems:items,planningRelations:relations,counts:{documents:(state.planningDocuments||[]).length,planningItems:(state.planningItems||[]).length,planningRelations:(state.planningRelations||[]).length}};}
 function arwanaAISetOutput(textValue){const el=document.getElementById('arwanaAIOutput');if(el)el.textContent=textValue;}
 async function arwanaAIRefreshAuth(){const el=document.getElementById('arwanaAIAuthStatus');if(!el)return;const c=arwanaAIConfig();if(!c.supabaseUrl||!c.anonKey){el.textContent='Isi URL proyek dan anon/publishable key, lalu simpan koneksi.';return;}const a=await arwanaAIAuthState();if(a.user){el.textContent='Login aktif: '+a.user.email+' · sesi Supabase tersedia.';}else{el.textContent='Belum login'+(a.error?': '+a.error:'')+'. Gunakan akun yang sudah terdaftar di Supabase Auth.';}}
@@ -2816,4 +3179,5 @@ render();
 
 <!-- V7.36: CSF source suggestions, target linkage required, edit/delete and explicit internal verification; preserves existing local state and schema. -->
 
+<!-- V7.39: AI assistant UI premium redesign -->
 <!-- V7.37: AI assistant UI; API secrets remain server-side in Supabase Edge Functions. -->
