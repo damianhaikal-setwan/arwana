@@ -1,0 +1,341 @@
+diff --git a/README.md b/README.md
+index d01a207..34f7112 100644
+--- a/README.md
++++ b/README.md
+@@ -1,90 +1,66 @@
+-# ARWANA AI — Starter Deployment Pack — V7.38
++# ARWANA — Deployment dan AI Assistant
+ 
+-Paket integrasi AI untuk ARWANA Perencanaan Terpadu. Frontend tetap HTML statis; autentikasi dan pemanggilan model AI berjalan melalui Supabase Edge Function. Tidak ada kredensial akun pengguna atau secret yang disertakan.
++Dokumen ini menjelaskan source yang berada di repository ini: `index.html`, Supabase Edge Function `supabase/functions/arwana-ai/index.ts`, dan konfigurasi `supabase/config.toml`. Jangan masukkan data operasional, file `.env`, access token, API key provider, atau `service_role` key ke repository.
+ 
+-## PWA (Progressive Web App)
++## Integrasi yang tersedia
+ 
+-Paket ini sudah menyertakan `manifest.webmanifest`, `service-worker.js`, ikon PNG 192/512 dan SVG, meta Apple/iOS, serta tombol pemasangan. Cloudflare Pages wajib menggunakan HTTPS agar service worker dan instalasi bekerja. Cache hanya menyimpan app shell/aset lokal; permintaan Supabase Auth, Edge Functions, dan API tidak pernah disimpan di cache. Mode offline hanya menyediakan shell aplikasi, bukan sinkronisasi data atau kemampuan AI offline. Pada iPhone, buka melalui Safari → Bagikan → Tambahkan ke Layar Utama.
++- Frontend berupa HTML statis. `index.html` memakai Supabase URL dan anon/publishable key untuk koneksi browser. Anon key memang dapat dilihat di browser; pembatasan data harus ditegakkan melalui autentikasi, grant, dan RLS.
++- Login dan logout menggunakan Supabase Auth. Jangan memakai `service_role` key di HTML.
++- AI dipanggil melalui fungsi `arwana-ai`, yang memvalidasi JWT, memeriksa `profiles.role`, memeriksa origin yang diizinkan, membatasi ukuran input, dan meminta jawaban dari endpoint OpenAI-compatible Chat Completions.
++- Enam agent umum tersedia: `design`, `regulation`, `implementor`, `sql`, `evolution`, dan `output`. Agent khusus ketujuh adalah `akip_evidence`.
++- AI menghasilkan draf/rekomendasi. Ia tidak boleh dianggap sebagai verifikasi bukti, keputusan resmi, atau pengesahan AKIP.
++- `supabase/config.toml` mempertahankan `verify_jwt = true`.
+ 
+-## Status nyata paket
++## PWA
+ 
+-- HTML ARWANA berbasis V7.36 dipertahankan; menu ARWANA AI ditambahkan dan login Supabase Auth diintegrasikan.
+-- UI koneksi menggunakan Supabase URL + anon/publishable key.
+-- Login/logout menggunakan Supabase Auth SDK; access token diambil dari sesi aktif, tidak ditempel manual.
+-- Edge Function memvalidasi token pengguna dan memanggil OpenAI Responses API dari server.
+-- Konteks yang dikirim dibatasi pada metadata dokumen perencanaan, data kinerja, target, dan relasi. Tanda tangan, data pegawai, anggota DPRD, dan perjalanan dinas tidak dikirim oleh fungsi pembentuk konteks ini.
+-- Hasil AI hanya berupa draf/rekomendasi; tidak menulis otomatis ke data bisnis.
+-- Pemeriksaan statis tersedia di `scripts/check_html.py` dan workflow GitHub Actions.
++Repository menyertakan `manifest.webmanifest`, `service-worker.js`, ikon, meta Apple/iOS, dan dukungan pemasangan. Cloudflare Pages harus disajikan melalui HTTPS agar service worker dan instalasi bekerja. Cache service worker hanya untuk app shell/aset lokal; request Supabase Auth, Edge Functions, dan API tidak boleh disimpan sebagai cache. Mode offline tidak menyinkronkan data dan tidak menyediakan AI offline. Di iPhone, buka melalui Safari → Bagikan → Tambahkan ke Layar Utama.
+ 
+-**Belum dilakukan:** deploy ke akun GitHub/Supabase/Cloudflare milik pengguna, konfigurasi secrets di akun, atau pengujian end-to-end di browser/iPhone. Itu memerlukan akses ke akun dan kredensial milik pengguna. Jangan mengirimkan password atau secret ke percakapan.
++## Deploy frontend
+ 
+-## 1. Siapkan GitHub
++Repository ini dapat dihubungkan ke Cloudflare Pages melalui Git:
+ 
+-1. Buat repositori GitHub **Private** bernama `arwana-ai`.
+-2. Ekstrak ZIP ini, lalu unggah seluruh isi folder (termasuk folder tersembunyi `.github`) ke root repositori.
+-3. Commit `index.html`, folder `supabase/`, `scripts/`, `.github/`, `_headers`, `.gitignore`, dan `README.md`.
+-4. Jangan mengunggah JSON data riil, file `.env`, token, `OPENAI_API_KEY`, atau service-role key.
+-5. GitHub Actions otomatis memeriksa sintaks inline JavaScript pada `index.html` saat push.
++1. Pilih framework preset **None**.
++2. Biarkan build command kosong.
++3. Gunakan `/` sebagai build output directory (root repository).
++4. Pastikan situs memakai HTTPS.
++5. Catat origin situs yang benar-benar terdeploy, misalnya `https://nama-proyek.pages.dev` atau domain kustom. Jangan menebak origin dari URL repository GitHub.
+ 
+-## 2. Siapkan Supabase Auth dan Edge Function
++`index.html` sudah memiliki konfigurasi browser Supabase. Hanya URL proyek dan anon/publishable key yang boleh berada di frontend; jangan menambahkan API key provider atau service-role key.
+ 
+-Di Supabase Dashboard:
++## Deploy dan konfigurasi Supabase Edge Function
+ 
+-1. Buka **Authentication → Users**, buat pengguna uji secara administratif. Matikan sign-up publik jika tidak dibutuhkan.
+-2. Ambil Project URL dan anon/publishable key. Keduanya digunakan di browser; **jangan gunakan service-role key**.
+-3. Pada komputer pengembang, pasang Supabase CLI, login, lalu tautkan direktori ini ke project yang benar:
++Dari root proyek Supabase yang benar:
+ 
+-   ```bash
+-   supabase login
+-   supabase link --project-ref PROJECT_REF
+-   supabase functions deploy arwana-ai
+-   ```
++```bash
++supabase link --project-ref PROJECT_REF
++supabase functions deploy arwana-ai
++```
+ 
+-4. Set secret server-side (jangan menaruh nilai secret dalam Git):
++Set secret provider dan origin server-side. Ganti nilai contoh dengan nilai proyek Anda; jangan commit nilainya:
+ 
+-   ```bash
+-   supabase secrets set OPENAI_API_KEY=ISI_SECRET_OPENAI
+-   supabase secrets set OPENAI_MODEL=gpt-4.1-mini
+-   supabase secrets set ARWANA_ALLOWED_USERS=operator@instansi.go.id,sekwan@instansi.go.id
+-   supabase secrets set ARWANA_ALLOWED_ORIGINS=https://DOMAIN-ARWANA.pages.dev
+-   ```
++```bash
++supabase secrets set \
++  ARWANA_LLM_API_KEY='ISI_SECRET_PROVIDER' \
++  ARWANA_LLM_CHAT_URL='https://api.openai.com/v1/chat/completions' \
++  ARWANA_LLM_MODEL='gpt-4o-mini' \
++  ARWANA_ALLOWED_ORIGINS='https://HOST-ARWANA-ANDA'
++```
+ 
+-   Jika memakai domain kustom, masukkan origin itu juga, dipisahkan koma. Contoh: `https://arwana.pages.dev,https://arwana.example.go.id`. Jangan masukkan path URL.
++`ARWANA_ALLOWED_ORIGINS` harus sama persis dengan origin hosting (scheme dan host, tanpa path). Untuk beberapa origin, pisahkan dengan koma. Fungsi juga memerlukan `SUPABASE_URL`, `SUPABASE_ANON_KEY`, dan `SUPABASE_SERVICE_ROLE_KEY` pada environment server Supabase. Pastikan `service_role` hanya tersedia di server, tidak di `index.html`.
+ 
+-5. `SUPABASE_URL` dan `SUPABASE_ANON_KEY` biasanya tersedia otomatis untuk Edge Functions. Jika proyek menggunakan nama secret berbeda, sesuaikan dengan environment proyek.
+-6. Konfigurasi function ada di `supabase/config.toml`, dengan verifikasi JWT aktif. Function memvalidasi pengguna melalui `auth.getUser()` dan memeriksa allowlist `ARWANA_ALLOWED_USERS`. Masukkan hanya email akun yang memang diberi izin; pisahkan beberapa email dengan koma. Tanpa allowlist, function gagal tertutup dan tidak memproses permintaan.
+-7. Jangan gunakan data pribadi/riil sebelum kebijakan keamanan, izin instansi, retensi, dan ketentuan penggunaan layanan AI ditinjau. Function AI ini tidak memerlukan akses service-role/database; ia hanya memvalidasi sesi dan memproses konteks terbatas yang dikirim frontend.
++Jangan menggunakan `OPENAI_API_KEY`, `OPENAI_MODEL`, atau `ARWANA_ALLOWED_USERS` untuk fungsi yang ada saat ini; variabel tersebut tidak dibaca oleh `supabase/functions/arwana-ai/index.ts`. Akses fungsi didasarkan pada JWT Supabase dan role pada `profiles`, bukan email allowlist tersebut.
+ 
+-## 3. Deploy Cloudflare Pages dari GitHub
++## Prasyarat rate limit
+ 
+-1. Buka Cloudflare Dashboard → **Workers & Pages → Create → Pages → Connect to Git**.
+-2. Pilih repositori `arwana-ai`.
+-3. Framework preset: **None**.
+-4. Build command: kosong / none.
+-5. Build output directory: `/` (root repositori).
+-6. Deploy. Setelah domain `*.pages.dev` tersedia, set `ARWANA_ALLOWED_ORIGINS` di Supabase dengan origin yang tepat, lalu deploy ulang Edge Function bila diperlukan.
+-7. Pada halaman ARWANA → menu **ARWANA AI Assistant**, isi:
+-   - URL proyek Supabase, contoh `https://PROJECT_REF.supabase.co`
+-   - anon/publishable key
+-   - URL function, contoh `https://PROJECT_REF.supabase.co/functions/v1/arwana-ai`
+-8. Simpan, login menggunakan akun Supabase Auth yang dibuat pengelola, lalu tekan **Uji Koneksi AI**.
++Fungsi memanggil RPC `arwana_ai_consume_rate` untuk membatasi penggunaan hingga 25 permintaan per pengguna per menit. Repository saat ini **belum menyertakan file migration** yang membuat RPC/tabel rate-limit tersebut. Pastikan migration yang sesuai sudah diterapkan di proyek Supabase sebelum menguji chat. Jika RPC tidak tersedia, fungsi mengembalikan 503. Perubahan dokumentasi ini tidak membuat atau mengubah migration.
+ 
+-## 4. Tes end-to-end setelah deployment
++## Uji setelah deploy
+ 
+-- Login benar berhasil; password salah ditolak.
+-- Tanpa login, panggilan AI harus ditolak dengan 401.
+-- `Uji Koneksi AI` mengembalikan jawaban singkat.
+-- Perintah analisis memakai data perencanaan aktif dan tidak mengirim data pegawai, tanda tangan, anggota DPRD, atau perjalanan dinas.
+-- Origin yang tidak diizinkan ditolak setelah `ARWANA_ALLOWED_ORIGINS` disetel.
+-- Secret yang tidak ada menghasilkan pesan konfigurasi generik; nilai secret tidak dikirim ke browser.
+-- Token kedaluwarsa meminta login ulang.
+-- Hasil AI dapat disalin/diunduh TXT, dan tidak mengubah data master secara otomatis.
+-- Uji Safari macOS, iPhone, responsif, jaringan gagal, kuota API, dan log function.
++1. Jalankan skrip read-only [`diagnostics/ARWANA-Check-DB-Profiles-RLS.sql`](diagnostics/ARWANA-Check-DB-Profiles-RLS.sql) di Supabase SQL Editor. Skrip menampilkan status tabel `profiles`, RLS, rincian policy, dan grant. Skrip tidak mengubah database.
++2. Login ke situs ARWANA menggunakan akun yang memiliki baris profil dan role yang diizinkan.
++3. Buka **ARWANA AI Assistant**, berikan consent cloud, lalu tekan **Uji Koneksi**.
++4. Health check memeriksa JWT, profil/role, konfigurasi fungsi, dan keberadaan secret LLM. Health check **tidak** mengirim prompt ke model. Kirim prompt pendek untuk menguji provider sebenarnya.
++5. Ikuti [Panduan Uji Edge Function ARWANA](docs/ARWANA-Edge-Function-Pengujian.md) untuk prompt setiap agent dan diagnosis kode respons.
++6. Tinjau log di **Supabase Dashboard → Edge Functions → `arwana-ai` → Logs**.
+ 
+-## Batasan keamanan yang belum digantikan paket ini
+-
+-- Data operasional utama pada versi prototipe masih menggunakan `localStorage` browser, bukan database bersama Supabase. Login AI **tidak** otomatis memindahkan data aplikasi atau menjamin RLS pada data lokal.
+-- Batasi akses repositori, akun Supabase, OpenAI API, dan Cloudflare menurut kebijakan instansi.
+-- Tambahkan rate limiting/kuota berbasis penyimpanan server-side sebelum penggunaan luas; batas sederhana di memori Edge Function tidak cukup untuk produksi.
+-- Gunakan RLS dan pengujian role bila nanti data bisnis dimigrasikan ke Supabase.
+-- AI bukan APIP/evaluator, tidak memberi skor/predikat resmi SAKIP, tidak mengesahkan dokumen, dan tidak boleh mengarang target atau realisasi.
++Jalankan pengujian dengan data nonrahasia. Chat yang lolos health check dapat memanggil provider dan menimbulkan biaya sesuai akun provider. Tinjau akses instansi, retensi, RLS/grant, dan ketentuan layanan sebelum penggunaan data riil. SQL Architect hanya menghasilkan draft; jangan menerapkan SQL atau policy tanpa review dan uji staging.
+diff --git a/diagnostics/ARWANA-Check-DB-Profiles-RLS.sql b/diagnostics/ARWANA-Check-DB-Profiles-RLS.sql
+new file mode 100644
+index 0000000..3913edc
+--- /dev/null
++++ b/diagnostics/ARWANA-Check-DB-Profiles-RLS.sql
+@@ -0,0 +1,108 @@
++-- ARWANA: diagnostik database dan RLS untuk public.profiles
++-- READ-ONLY: skrip ini hanya membaca metadata katalog; tidak mengubah tabel, kebijakan, atau data.
++-- Jalankan di SQL Editor proyek Supabase yang benar.
++-- Catatan: SQL Editor biasanya memakai role berprivilege tinggi; hasil ini memeriksa konfigurasi,
++-- bukan simulasi perilaku setiap request pengguna authenticated di aplikasi.
++
++-- Hasil 1: status database, tabel, RLS, dan kebijakan yang berpotensi terlalu luas.
++WITH target AS (
++  SELECT to_regclass('public.profiles') AS relid
++), metrics AS (
++  SELECT
++    clock_timestamp() AS checked_at,
++    current_database() AS database_name,
++    current_user AS sql_editor_role,
++    target.relid IS NOT NULL AS profiles_exists,
++    COALESCE((SELECT c.relrowsecurity FROM pg_class AS c WHERE c.oid = target.relid), false) AS rls_enabled,
++    COALESCE((SELECT c.relforcerowsecurity FROM pg_class AS c WHERE c.oid = target.relid), false) AS rls_forced,
++    (
++      SELECT count(*)
++      FROM pg_policies AS p
++      WHERE p.schemaname = 'public' AND p.tablename = 'profiles'
++    ) AS policy_count,
++    (
++      SELECT count(*)
++      FROM pg_policies AS p
++      WHERE p.schemaname = 'public'
++        AND p.tablename = 'profiles'
++        AND upper(p.permissive) = 'PERMISSIVE'
++        AND p.cmd IN ('SELECT', 'ALL')
++        AND lower(regexp_replace(COALESCE(p.qual, ''), '[[:space:]()]', '', 'g')) = 'true'
++    ) AS unrestricted_permissive_read_policy_count,
++    (
++      SELECT count(*)
++      FROM pg_policies AS p
++      WHERE p.schemaname = 'public'
++        AND p.tablename = 'profiles'
++        AND upper(p.permissive) = 'PERMISSIVE'
++        AND (
++          (p.cmd IN ('INSERT', 'UPDATE', 'ALL')
++           AND lower(regexp_replace(COALESCE(p.with_check, ''), '[[:space:]()]', '', 'g')) = 'true')
++          OR
++          (p.cmd IN ('DELETE', 'ALL')
++           AND lower(regexp_replace(COALESCE(p.qual, ''), '[[:space:]()]', '', 'g')) = 'true')
++        )
++    ) AS broad_permissive_write_policy_count
++  FROM target
++)
++SELECT
++  checked_at,
++  database_name,
++  sql_editor_role,
++  profiles_exists,
++  rls_enabled,
++  rls_forced,
++  policy_count,
++  unrestricted_permissive_read_policy_count,
++  broad_permissive_write_policy_count,
++  CASE
++    WHEN NOT profiles_exists THEN 'FAIL: public.profiles tidak ditemukan.'
++    WHEN NOT rls_enabled THEN 'FAIL: RLS belum aktif pada public.profiles.'
++    WHEN policy_count = 0 THEN 'WARNING: RLS aktif, tetapi tidak ada policy; akses API non-bypass biasanya tertutup.'
++    WHEN unrestricted_permissive_read_policy_count > 0 THEN 'WARNING: ditemukan policy SELECT/ALL permissive dengan USING (true); periksa akses baca semua profil.'
++    WHEN broad_permissive_write_policy_count > 0 THEN 'WARNING: ditemukan policy tulis permissive yang terlalu luas atau perlu ditinjau.'
++    ELSE 'CHECKED: RLS aktif dan policy ditemukan; tetap tinjau rincian policy serta uji dengan sesi pengguna aplikasi.'
++  END AS diagnostic_status
++FROM metrics;
++
++-- Hasil 2: rincian policy untuk ditinjau. USING (true) pada policy SELECT permissive
++-- berarti semua baris yang mendapat privilege SELECT dapat terlihat lewat policy tersebut.
++SELECT
++  p.policyname,
++  p.permissive,
++  p.roles,
++  p.cmd,
++  p.qual AS using_expression,
++  p.with_check,
++  CASE
++    WHEN upper(p.permissive) = 'PERMISSIVE'
++      AND p.cmd IN ('SELECT', 'ALL')
++      AND lower(regexp_replace(COALESCE(p.qual, ''), '[[:space:]()]', '', 'g')) = 'true'
++      THEN 'WARNING: policy baca permissive tanpa pembatas baris; tinjau data profil yang dapat dibaca.'
++    WHEN upper(p.permissive) = 'PERMISSIVE'
++      AND p.cmd IN ('INSERT', 'UPDATE', 'ALL')
++      AND lower(regexp_replace(COALESCE(p.with_check, ''), '[[:space:]()]', '', 'g')) = 'true'
++      THEN 'WARNING: WITH CHECK permissive; tinjau siapa yang boleh menulis baris.'
++    WHEN upper(p.permissive) = 'PERMISSIVE'
++      AND p.cmd IN ('DELETE', 'ALL')
++      AND lower(regexp_replace(COALESCE(p.qual, ''), '[[:space:]()]', '', 'g')) = 'true'
++      THEN 'WARNING: policy hapus permissive; tinjau siapa yang boleh menghapus baris.'
++    ELSE 'REVIEW: periksa ekspresi, role, grant, dan kebutuhan akses.'
++  END AS review_note
++FROM pg_policies AS p
++WHERE p.schemaname = 'public' AND p.tablename = 'profiles'
++ORDER BY p.policyname;
++
++-- Hasil 3: privilege tabel untuk role API yang lazim digunakan.
++SELECT
++  grantee,
++  privilege_type,
++  is_grantable
++FROM information_schema.role_table_grants
++WHERE table_schema = 'public'
++  AND table_name = 'profiles'
++  AND grantee IN ('anon', 'authenticated')
++ORDER BY grantee, privilege_type;
++
++-- Pemeriksaan RLS fungsional tetap perlu dilakukan melalui aplikasi/API dengan sesi pengguna.
++-- Jangan menilai akses pengguna hanya dari SELECT di SQL Editor yang memakai role postgres.
+\ No newline at end of file
+diff --git a/docs/ARWANA-Edge-Function-Pengujian.md b/docs/ARWANA-Edge-Function-Pengujian.md
+new file mode 100644
+index 0000000..81bc7f4
+--- /dev/null
++++ b/docs/ARWANA-Edge-Function-Pengujian.md
+@@ -0,0 +1,79 @@
++# Panduan Uji Supabase Edge Function ARWANA
++
++## Cakupan agent
++
++Uji enam agent umum: `design`, `regulation`, `implementor`, `sql`, `evolution`, dan `output`. Versi HTML yang ada juga mendukung agent khusus ketujuh, `akip_evidence` (AKIP Evidence Assistant). Uji agent AKIP secara terpisah dengan role yang diizinkan.
++
++## 1. Pemeriksaan database dan RLS `profiles`
++
++1. Buka **Supabase Dashboard → SQL Editor** pada proyek yang benar.
++2. Jalankan skrip read-only [`ARWANA-Check-DB-Profiles-RLS.sql`](../diagnostics/ARWANA-Check-DB-Profiles-RLS.sql).
++3. Pada hasil pertama, periksa `profiles_exists = true`, `rls_enabled = true`, dan status diagnostik. RLS aktif saja belum membuktikan ekspresi policy sudah aman.
++4. Periksa hasil kedua untuk role, command, `USING`, dan `WITH CHECK`. Policy permissive `SELECT` dengan `USING (true)` berpotensi membuka seluruh baris yang dapat dibaca oleh role tersebut.
++5. Hasil ketiga menampilkan privilege tabel untuk `anon` dan `authenticated`.
++
++Skrip hanya membaca katalog database; tidak mengubah data atau policy. SQL Editor umumnya memakai role berprivilege tinggi, sehingga hasil ini tidak mensimulasikan akses pengguna akhir. Uji RLS fungsional juga melalui aplikasi/API dengan sesi authenticated.
++
++## 2. Prasyarat Edge Function
++
++- Pengguna uji harus mempunyai baris `public.profiles` dengan `profiles.id` yang sama dengan UUID `auth.users.id`, serta `profiles.role` yang termasuk role diizinkan.
++- Pastikan environment Edge Function memiliki `ARWANA_LLM_API_KEY`, `ARWANA_LLM_CHAT_URL`, `ARWANA_LLM_MODEL`, dan `ARWANA_ALLOWED_ORIGINS`. Jangan simpan key provider di HTML atau Git.
++- `ARWANA_ALLOWED_ORIGINS` harus cocok persis dengan origin hosting, termasuk `https://` tetapi tanpa path. Domain aktual harus diambil dari deployment Cloudflare Pages, bukan ditebak dari URL GitHub.
++- Fungsi juga memerlukan `SUPABASE_URL`, `SUPABASE_ANON_KEY`, dan `SUPABASE_SERVICE_ROLE_KEY` di server. Jangan pernah mengekspos service-role key ke browser.
++- Pertahankan `verify_jwt = true` di `supabase/config.toml`.
++- Fungsi memanggil RPC `arwana_ai_consume_rate` dan mengembalikan 503 jika RPC tidak tersedia. Repository ini saat ini tidak memiliki migration rate-limit di `supabase/migrations`; pastikan migration terkait sudah diterapkan di proyek Supabase sebelum uji chat. Panduan ini tidak membuat atau mengubah migration.
++
++Contoh deploy fungsi (jalankan dari root proyek Supabase yang benar):
++
++```bash
++supabase link --project-ref PROJECT_REF
++supabase functions deploy arwana-ai
++```
++
++Set secrets melalui Dashboard atau CLI di lingkungan aman. Jangan commit nilainya:
++
++```bash
++supabase secrets set \
++  ARWANA_LLM_API_KEY='ISI_SECRET_PROVIDER' \
++  ARWANA_LLM_CHAT_URL='https://api.openai.com/v1/chat/completions' \
++  ARWANA_LLM_MODEL='gpt-4o-mini' \
++  ARWANA_ALLOWED_ORIGINS='https://HOST-ARWANA-ANDA'
++```
++
++## 3. Uji koneksi
++
++1. Buka situs ARWANA terdeploy melalui HTTPS.
++2. Login dengan pengguna uji yang memiliki profil dan role valid.
++3. Buka **ARWANA AI Assistant**, baca dan berikan consent cloud.
++4. Tekan **Uji Koneksi**.
++
++Health check memverifikasi JWT, profil/role, dan konfigurasi secret. Health check tidak mengirim prompt ke provider LLM. Kirim prompt chat pendek untuk memastikan model/provider benar-benar menjawab.
++
++## 4. Uji setiap agent
++
++Gunakan prompt singkat dan data nonrahasia. Pastikan respons berasal dari Edge Function, bukan fallback lokal.
++
++| Agent | Prompt uji | Hasil yang diharapkan |
++|---|---|---|
++| Design AI (`design`) | “Usulkan patch CSS kecil agar kartu dashboard lebih mudah dibaca; jangan ubah data atau hak akses.” | Jawaban dan patch CSS terbatas pada `#appView`; tinjau pratinjau sebelum menerapkan. |
++| Regulation Reader (`regulation`) | “Ringkas dokumen contoh yang tersedia di konteks, sebutkan sumber/ID, dan tandai bila dasar belum cukup.” | Ringkasan berbasis konteks, tanpa mengarang pasal atau kutipan. |
++| Workflow Builder (`implementor`) | “Rancang alur tindak lanjut aspirasi ke Pokir beserta status, peran, validasi, dan kasus gagal.” | Rancangan untuk ditinjau, bukan klaim bahwa alur sudah dijalankan. |
++| SQL Architect (`sql`) | “Buat draft query baca dengan asumsi kolom yang harus saya verifikasi dan prinsip RLS least-privilege.” | Draft SQL tanpa eksekusi dan tanpa policy terbuka `USING (true)`. |
++| Evolution Planner (`evolution`) | “Buat prioritas peningkatan, dependensi, risiko, dan indikator sukses; tandai data yang belum tersedia.” | Prioritas/asumsi dibedakan; tidak mengarang angka GAP. |
++| Output Forge (`output`) | “Buat kerangka memo tindak lanjut berlabel DRAF dan tandai bagian yang harus diverifikasi.” | Draf yang belum disahkan/dikirim. |
++| AKIP Evidence Assistant (`akip_evidence`) | “Susun matriks bukti AKIP dari data nonrahasia yang tersedia; sebutkan tabel/ID, gap, status verifikasi, dan langkah lanjut. Jangan memberi predikat.” | Hanya menggunakan konteks yang tersedia dan membedakan catatan dari bukti terverifikasi. |
++
++Untuk `regulation` dan `akip_evidence`, muat dokumen/data relevan lebih dulu. Jika konteks kosong, respons yang tepat adalah menyatakan sumber belum cukup, bukan menebak.
++
++## 5. Log dan diagnosis
++
++Buka **Supabase Dashboard → Edge Functions → `arwana-ai` → Logs** dan cocokkan waktunya dengan uji di aplikasi.
++
++- **401**: token tidak ada, kedaluwarsa, atau tidak valid.
++- **403**: origin tidak diizinkan, profil/role tidak valid, atau role tidak diizinkan untuk agent AKIP.
++- **400**: action, agent, prompt, atau consent tidak valid.
++- **503**: secret LLM belum tersedia atau RPC rate-limit belum diterapkan.
++- **429**: batas 25 permintaan per pengguna per menit tercapai.
++- **502**: provider menolak, tidak terjangkau, atau memberi respons yang tidak dapat diproses.
++
++Jangan gunakan data rahasia/terklasifikasi. Setiap chat yang mencapai provider dapat menimbulkan biaya provider. Jangan membagikan access token, `service_role`, atau API key provider.
+\ No newline at end of file
