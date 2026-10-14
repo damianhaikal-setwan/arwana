@@ -19,6 +19,7 @@ tailwind.config={
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <style>
 body{font-family:Inter,system-ui;line-height:1.7;letter-spacing:-.01em}
 h1,h2,h3,.display{font-family:"Plus Jakarta Sans",Inter,sans-serif;letter-spacing:-.03em}
@@ -88,7 +89,7 @@ h1,h2,h3,.display{font-family:"Plus Jakarta Sans",Inter,sans-serif;letter-spacin
     <nav id="nav" class="flex-1 overflow-auto px-3 pb-4 space-y-6 scrollbar-thin"></nav>
     <div class="p-3 border-t border-white/10">
       <div class="rounded-2xl bg-white/[0.06] border border-white/10 p-3">
-        <div class="flex items-center gap-3"><div id="userAvatar" class="w-9 h-9 rounded-xl bg-gradient-to-br from-gold to-gold-600 grid place-items-center text-navy font-bold">A</div><div class="flex-1 min-w-0"><b id="userName" class="text-[13px] text-white block truncate">Memuat...</b><span id="userRole" class="text-[11px] opacity-60 block truncate">Memuat...</span></div><button id="btnLogout" class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 grid place-items-center"><i data-lucide="log-out" class="w-4 h-4"></i></button></div>
+        <div class="flex items-center gap-3"><div id="userAvatar" class="w-9 h-9 rounded-xl bg-gradient-to-br from-gold to-gold-600 grid place-items-center text-navy font-bold">A</div><div class="flex-1 min-w-0"><b id="userName" class="text-[13px] text-white block truncate">Memuat...</b><span id="userRole" class="text-[11px] opacity-60 block truncate">Memuat...</span></div><button id="btnLogout" type="button" aria-label="Keluar" title="Keluar dari ARWANA" class="w-8 h-8 rounded-lg bg-white/5 border border-white/10 grid place-items-center"><i data-lucide="log-out" class="w-4 h-4"></i></button></div>
         <div class="mt-3 flex gap-2"><span id="chipBagian" class="text-[10px] px-2.5 py-1 rounded-full bg-white/10 border border-white/10">Bagian: -</span><span id="chipRole" class="text-[10px] px-2.5 py-1 rounded-full bg-gold/15 border border-gold/20 text-gold">Role: -</span></div>
       </div>
       <div class="mt-3 flex justify-between items-center"><span id="supabaseStatus" class="text-[10px] px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/20">Supabase: cek</span><span class="text-[10px] opacity-50">AI: Edge / Lokal</span></div>
@@ -111,7 +112,10 @@ h1,h2,h3,.display{font-family:"Plus Jakarta Sans",Inter,sans-serif;letter-spacin
 <script type="module">
 // ===== ARWANA v81 - MODERN + AI ASSISTANT RESTORED =====
 const LS={url:'arwana_supa_url',key:'arwana_supa_key',state:'arwana_v81_state',sess:'arwana_v81_sess'};
-let SUPA_URL=localStorage.getItem(LS.url)||''; let SUPA_ANON=localStorage.getItem(LS.key)||''; let supa=null, supaMod=null;
+// Public browser configuration: use the embedded project on first load; saved Settings remain an explicit override.
+const EMBEDDED_SUPA_URL='https://oqxxygyvmxlnekdavzst.supabase.co';
+const EMBEDDED_SUPA_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xeHh5Z3l2bXhsbmVrZGF2enN0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE4OTk0NzcsImV4cCI6MjEwNzQ3NTQ3N30.eJ_wKgjIAkuRXax2f7312YrIt2n3XKLC61rcjVO4mKw';
+let SUPA_URL=localStorage.getItem(LS.url)||EMBEDDED_SUPA_URL; let SUPA_ANON=localStorage.getItem(LS.key)||EMBEDDED_SUPA_ANON; let supa=null, supaMod=null;
 function esc(s){ const d=document.createElement('div'); d.textContent=String(s??''); return d.innerHTML; }
 function sanitizeInput(s,max=500){ let t=String(s??'').trim(); if(t.length>max) t=t.slice(0,max); return t.replace(/<script\b[^>]*>.*?<\/script>/gi,'').replace(/javascript:/gi,''); }
 function validEmail(e){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);}
@@ -119,6 +123,8 @@ function toast(msg,type='info'){ const c=document.getElementById('toastContainer
 
 async function initSupa(){
   const el=document.getElementById('supabaseStatus');
+  const cfg=document.getElementById('configForm');
+  if(cfg){const urlField=cfg.elements.namedItem('url'),keyField=cfg.elements.namedItem('anon');if(urlField&&!urlField.value)urlField.value=SUPA_URL;if(keyField&&!keyField.value)keyField.value=SUPA_ANON;}
   if(!SUPA_URL||!SUPA_ANON){ el.textContent='Mode lokal'; el.className='text-[10px] px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-300 border'; return null; }
   try{ if(!supaMod) supaMod=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'); supa=supaMod.createClient(SUPA_URL,SUPA_ANON,{auth:{persistSession:true}}); el.textContent='Supabase siap'; el.className='text-[10px] px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border'; return supa; }catch(e){ el.textContent='Supabase gagal'; return null; }
 }
@@ -709,62 +715,87 @@ async function aiSend(){
 function aiClearChat(){if(!confirm('Hapus riwayat chat?'))return;state.aiChats=[];saveLocal();if(cloudSession())supa.from('ai_chats').delete().eq('user_id',session.id).then(()=>{},()=>{});renderPage();toast('Riwayat chat dihapus','warn');}
 window.aiCopy=function(i){const m=state.aiChats[i];if(m){navigator.clipboard.writeText(m.content);toast('Disalin','success');}};
 function ragChunk(t){const out=[];let cur='';for(const p of t.replace(/\r/g,'').split(/\n\s*\n/)){if(cur&&(cur+p).length>900){out.push(cur.trim());cur='';}cur+=p+'\n\n';while(cur.length>1400){out.push(cur.slice(0,900));cur=cur.slice(900);}}if(cur.trim())out.push(cur.trim());return out;}
-function renderRagBank(){const docs=state.ragDocs||[];return `<div class="grid xl:grid-cols-3 gap-4"><div class="rounded-[20px] border bg-white dark:bg-[#12213C] p-5 shadow-soft"><h3 class="display text-[16px]">Unggah ke Bank Dokumen</h3><p class="mt-1 text-[12px] text-slate-500">Format teks: .txt .md .csv .json (maks 3 MB). Dipecah ±900 karakter dan dicari lokal oleh Assistant dengan pembobotan kata. Untuk PDF, salin teksnya ke kotak di bawah.</p><input id="ragTitle" placeholder="Judul dokumen" class="mt-3 w-full px-4 py-2.5 rounded-xl border text-[13px]"><input id="ragFile" type="file" accept=".txt,.md,.csv,.json" class="mt-2 w-full text-[12px]"><textarea id="ragText" rows="6" placeholder="atau tempel teks dokumen di sini" class="mt-2 w-full px-4 py-3 rounded-xl border text-[13px]"></textarea><button onclick="ragSave()" class="mt-3 w-full py-2.5 rounded-xl bg-navy text-white text-[13px]">Simpan &amp; indeks</button></div><div class="xl:col-span-2 rounded-[20px] border bg-white dark:bg-[#12213C] shadow-soft overflow-hidden">${docs.length?docs.map(d=>`<div class="flex items-center gap-3 px-5 py-3 border-b text-[13px]"><div class="flex-1 min-w-0"><b class="block truncate">${esc(d.judul)}</b><span class="text-[11px] text-slate-500">${esc(d.jenis||'teks')} • ${(state.ragChunks||[]).filter(c=>c.document_id===d.id).length} bagian • ${new Date(d.created_at).toLocaleDateString('id-ID')}</span></div><button onclick="ragDelete('${esc(d.id)}')" class="w-8 h-8 rounded-lg border grid place-items-center"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div>`).join(''):'<p class="p-10 text-center text-[13px] text-slate-500">Belum ada dokumen. Unggah Perbup, Perda, atau notulen agar Assistant dapat mengutipnya.</p>'}</div></div>`;}
+let ragSaveBusy=false;
+function ragSetUploadStatus(message,type='info'){
+  const el=document.getElementById('ragUploadStatus');if(!el)return;
+  const color=type==='error'?'text-red-600':type==='success'?'text-emerald-700':'text-slate-500';
+  el.className='mt-2 text-[12px] '+color;el.textContent=message||'';
+}
+async function ragReadPdf(file,onProgress=()=>{}){
+  if(!window.pdfjsLib)throw new Error('Pustaka pembaca PDF belum termuat. Periksa koneksi internet/CDN, muat ulang halaman, lalu coba lagi.');
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  onProgress('Membaca berkas PDF…');const bytes=new Uint8Array(await file.arrayBuffer());
+  onProgress('Membuka dan memeriksa PDF…');const loading=window.pdfjsLib.getDocument({data:bytes});
+  loading.onProgress=progress=>onProgress(progress?.total?'Memuat PDF… '+Math.round((progress.loaded/progress.total)*100)+'%':'Memuat PDF…');
+  const pdf=await loading.promise;
+  if(pdf.numPages>500)throw new Error('PDF memiliki '+pdf.numPages+' halaman; batas unggah saat ini 500 halaman.');
+  const pages=[];let total=0;
+  for(let pageNo=1;pageNo<=pdf.numPages;pageNo++){
+    onProgress('Mengekstrak teks PDF — halaman '+pageNo+' dari '+pdf.numPages+'…');
+    const page=await pdf.getPage(pageNo);const content=await page.getTextContent();
+    const text=(content.items||[]).filter(x=>typeof x.str==='string').map(x=>x.str).join(' ').replace(/[\t ]+/g,' ').trim();
+    if(text){pages.push({page:pageNo,text});total+=text.length;}
+  }
+  if(total<20)throw new Error('PDF terpilih, tetapi lapisan teks tidak ditemukan. Jika PDF berupa hasil scan/gambar, lakukan OCR terlebih dahulu lalu unggah ulang.');
+  return{numPages:pdf.numPages,pages,total};
+}
+function renderRagBank(){const docs=state.ragDocs||[];return `<div class="grid xl:grid-cols-3 gap-4"><div class="rounded-[20px] border bg-white dark:bg-[#12213C] p-5 shadow-soft"><h3 class="display text-[16px]">Unggah ke Bank Dokumen</h3><p class="mt-1 text-[12px] text-slate-500">Pilih PDF (maks 10 MB) atau .txt/.md/.csv/.json (maks 3 MB). Teks PDF diekstrak per halaman dan diindeks untuk pencarian AI. PDF hasil scan tanpa lapisan teks perlu OCR terlebih dahulu.</p><input id="ragTitle" placeholder="Judul dokumen" class="mt-3 w-full px-4 py-2.5 rounded-xl border text-[13px]"><input id="ragFile" type="file" accept=".pdf,application/pdf,.txt,.md,.csv,.json,text/plain,text/markdown,text/csv,application/json" class="mt-2 w-full text-[12px]"><textarea id="ragText" rows="6" placeholder="atau tempel teks dokumen di sini" class="mt-2 w-full px-4 py-3 rounded-xl border text-[13px]"></textarea><div id="ragUploadStatus" aria-live="polite" class="mt-2 text-[12px] text-slate-500"></div><button id="ragSaveBtn" onclick="ragSave()" class="mt-3 w-full py-2.5 rounded-xl bg-navy text-white text-[13px]">Pilih file lalu Simpan &amp; indeks</button></div><div class="xl:col-span-2 rounded-[20px] border bg-white dark:bg-[#12213C] shadow-soft overflow-hidden">${docs.length?docs.map(d=>`<div class="flex items-center gap-3 px-5 py-3 border-b text-[13px]"><div class="flex-1 min-w-0"><b class="block truncate">${esc(d.judul)}</b><span class="text-[11px] text-slate-500">${esc(d.jenis||'teks')} • ${Number(d.num_pages||1)} halaman • ${(state.ragChunks||[]).filter(c=>c.document_id===d.id).length} bagian • ${new Date(d.created_at).toLocaleDateString('id-ID')}</span></div><button onclick="ragDelete('${esc(d.id)}')" class="w-8 h-8 rounded-lg border grid place-items-center"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button></div>`).join(''):'<p class="p-10 text-center text-[13px] text-slate-500">Belum ada dokumen. Unggah Perbup, Perda, atau notulen agar Assistant dapat mengutipnya.</p>'}</div></div>`;}
 window.ragSave=async function(){
+  if(ragSaveBusy)return;
   const fileInput=document.getElementById('ragFile');
   const titleInput=document.getElementById('ragTitle');
   const textInput=document.getElementById('ragText');
-  if(!fileInput||!titleInput||!textInput) return;
-  const f=fileInput.files?.[0];
-  let txt=textInput.value||'';
-  let title=(titleInput.value||'').trim();
-  let cloudDocId=null;
+  if(!fileInput||!titleInput||!textInput)return;
+  const f=fileInput.files?.[0];let txt=textInput.value||'';let title=(titleInput.value||'').trim();
+  let numPages=1;let pageTexts=null;let cloudDocId=null;let truncated=false;
+  const btn=document.getElementById('ragSaveBtn');ragSaveBusy=true;
+  if(btn){btn.disabled=true;btn.textContent='Memproses dokumen…';}
+  ragSetUploadStatus('Menyiapkan dokumen…');
   try{
     if(f){
-      if(f.size>3e6) throw new Error('Maksimal ukuran file 3 MB.');
-      txt=await f.text();
-      title=title||f.name;
+      const ext=(f.name.split('.').pop()||'').toLowerCase();const isPdf=ext==='pdf'||f.type==='application/pdf';
+      if(isPdf){
+        if(f.size>10*1024*1024)throw new Error('Maksimal ukuran PDF 10 MB.');
+        const parsed=await ragReadPdf(f,msg=>ragSetUploadStatus(msg));
+        numPages=parsed.numPages;pageTexts=parsed.pages;txt=pageTexts.map(x=>'[Halaman '+x.page+'] '+x.text).join('\n\n');
+        title=title||f.name;
+      }else{
+        if(!['txt','md','csv','json'].includes(ext))throw new Error('Format belum didukung. Pilih PDF, TXT, MD, CSV, atau JSON.');
+        if(f.size>3*1024*1024)throw new Error('Maksimal ukuran file teks 3 MB.');
+        txt=await f.text();title=title||f.name;
+      }
     }
-    txt=txt.trim();
-    if(!txt) throw new Error('Teks dokumen kosong.');
+    txt=txt.trim();if(!txt)throw new Error('Teks dokumen kosong.');
+    const maxChars=200000;if(txt.length>maxChars){txt=txt.slice(0,maxChars);truncated=true;}
     title=sanitizeInput(title||'Dokumen '+new Date().toLocaleDateString('id-ID'),200);
-    const parts=ragChunk(txt);
-    if(!parts.length) throw new Error('Teks tidak menghasilkan bagian yang dapat diindeks.');
-    let doc={id:(crypto.randomUUID?crypto.randomUUID():'rag-'+Date.now()),judul:title,jenis:f?f.name.split('.').pop():'teks',created_at:new Date().toISOString()};
+    let sourcePages;
+    if(pageTexts){
+      let remaining=maxChars;sourcePages=[];
+      for(const item of pageTexts){if(remaining<=0)break;const text=item.text.slice(0,remaining);if(text)sourcePages.push({page:item.page,text});remaining-=text.length;}
+      if(pageTexts.reduce((n,x)=>n+x.text.length,0)>maxChars)truncated=true;
+    }else sourcePages=[{page:1,text:txt}];
+    const parts=sourcePages.flatMap(item=>ragChunk(item.text).map(text=>({page:item.page,text})));
+    if(!parts.length)throw new Error('Teks dokumen tidak menghasilkan bagian yang dapat diindeks.');
+    let doc={id:(crypto.randomUUID?crypto.randomUUID():'rag-'+Date.now()),judul:title,jenis:f?(f.name.split('.').pop()||'teks').toLowerCase():'teks',num_pages:numPages,created_at:new Date().toISOString()};
     let chunks;
     if(cloudSession()){
-      const {data,error}=await supa.from('rag_documents').insert({
-        judul:title,jenis:doc.jenis,num_pages:1,full_text:txt.slice(0,200000),created_by:session.id
-      }).select('id,judul,jenis,created_at').single();
-      if(error) throw error;
-      doc=data;
-      cloudDocId=doc.id;
-      chunks=parts.map((t,i)=>({document_id:doc.id,page:1,chunk_index:i,text:t}));
+      ragSetUploadStatus('Menyimpan metadata dokumen ke Supabase…');
+      const{data,error}=await supa.from('rag_documents').insert({judul:title,jenis:doc.jenis,num_pages:numPages,full_text:txt.slice(0,maxChars),created_by:session.id}).select('id,judul,jenis,num_pages,created_at').single();
+      if(error)throw error;doc=data;cloudDocId=doc.id;
+      chunks=parts.map((item,i)=>({document_id:doc.id,page:item.page,chunk_index:i,text:item.text}));
       try{
-        for(let i=0;i<chunks.length;i+=200){
-          const {error:chunkError}=await supa.from('rag_chunks').insert(chunks.slice(i,i+200));
-          if(chunkError) throw chunkError;
-        }
-      }catch(chunkError){
-        // Upayakan rollback parent; FK ON DELETE CASCADE membersihkan chunk yang sudah masuk.
-        await supa.from('rag_documents').delete().eq('id',cloudDocId);
-        cloudDocId=null;
-        throw chunkError;
-      }
+        for(let i=0;i<chunks.length;i+=200){ragSetUploadStatus('Menyimpan indeks '+Math.min(i+200,chunks.length)+' dari '+chunks.length+' bagian…');const{error:chunkError}=await supa.from('rag_chunks').insert(chunks.slice(i,i+200));if(chunkError)throw chunkError;}
+      }catch(chunkError){await supa.from('rag_documents').delete().eq('id',cloudDocId);cloudDocId=null;throw chunkError;}
     }else{
-      chunks=parts.map((t,i)=>({id:(crypto.randomUUID?crypto.randomUUID():'chunk-'+Date.now()+'-'+i),document_id:doc.id,page:1,chunk_index:i,text:t}));
+      chunks=parts.map((item,i)=>({id:(crypto.randomUUID?crypto.randomUUID():'chunk-'+Date.now()+'-'+i),document_id:doc.id,page:item.page,chunk_index:i,text:item.text}));
     }
-    state.ragDocs=state.ragDocs||[];
-    state.ragChunks=state.ragChunks||[];
-    state.ragDocs.unshift(doc);
-    state.ragChunks.push(...chunks);
-    saveLocal();
-    logAudit('Unggah','ragbank',doc.id,title);
-    toast(`${parts.length} bagian diindeks${cloudSession()?' dan disimpan di Supabase':' secara lokal'}`,'success');
-    renderPage();
+    state.ragDocs=state.ragDocs||[];state.ragChunks=state.ragChunks||[];state.ragDocs.unshift(doc);state.ragChunks.push(...chunks);saveLocal();logAudit('Unggah','ragbank',doc.id,title);
+    ragSetUploadStatus((f?.name.toLowerCase().endsWith('.pdf')?'PDF':'Dokumen')+' berhasil diindeks: '+numPages+' halaman, '+parts.length+' bagian'+(truncated?' (teks dibatasi 200.000 karakter)':'' )+'.','success');
+    const isPdfUpload=!!f&&(f.type==='application/pdf'||f.name.toLowerCase().endsWith('.pdf'));toast(`${isPdfUpload?'PDF '+numPages+' halaman — ':''}${parts.length} bagian diindeks${cloudSession()?' dan disimpan di Supabase':' secara lokal'}${truncated?' (teks dibatasi 200.000 karakter)':''}`,'success');renderPage();
   }catch(e){
-    console.error('Gagal menyimpan Bank Dokumen:',e);
-    toast('Gagal menyimpan dokumen: '+(e.message||e),'warn');
+    console.error('Gagal menyimpan Bank Dokumen:',e);ragSetUploadStatus(e.message||'Gagal memproses dokumen.','error');toast('Gagal menyimpan dokumen: '+(e.message||e),'warn');
+  }finally{
+    ragSaveBusy=false;const currentBtn=document.getElementById('ragSaveBtn');if(currentBtn){currentBtn.disabled=false;currentBtn.textContent='Pilih file lalu Simpan & indeks';}
   }
 };
 window.ragDelete=async function(id){
@@ -898,7 +929,7 @@ function renderUserGuide(){
       <div class="flex flex-col sm:flex-row sm:flex-wrap items-start sm:justify-between gap-3"><div class="w-full sm:w-auto"><span class="text-[10px] font-bold tracking-widest uppercase text-blue-700">ARWANA • Panduan Operasional</span><h2 class="display text-[20px] sm:text-[23px] mt-1">Panduan AI Assistant & Ekspor</h2><p class="mt-2 max-w-[75ch] text-[13px] text-slate-600">Petunjuk singkat mengelola Bank Dokumen, bertanya kepada Assistant, dan meninjau data sebelum membuat file Excel atau PDF.</p></div><div class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row"><button onclick="window.arwanaNavigate('aiassistant')" class="w-full sm:w-auto px-3 py-2 rounded-xl bg-violet-700 text-white text-[12px]">Buka AI Assistant</button><button onclick="window.arwanaNavigate('ragbank')" class="w-full sm:w-auto px-3 py-2 rounded-xl border bg-white text-[12px]">Buka Bank Dokumen</button></div></div>
     </section>
     <div class="grid min-w-0 grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
-      <section class="rounded-[20px] border bg-white p-4 sm:p-5 shadow-soft"><div class="flex items-center gap-3"><span class="w-9 h-9 rounded-xl bg-blue-50 text-blue-700 grid place-items-center"><i data-lucide="library" class="w-5 h-5"></i></span><div><h3 class="display text-[16px]">1. Bank Dokumen</h3><p class="text-[11px] text-slate-500">Siapkan sumber yang akan dicari AI Assistant.</p></div></div><ol class="mt-4 list-decimal pl-5 space-y-2 text-[12px] leading-relaxed text-slate-700"><li>Buka menu <b>Bank Dokumen</b>, masukkan judul, lalu pilih file teks atau tempel teks langsung.</li><li>Format file yang diterima: <b>.txt, .md, .csv, .json</b>, maksimum <b>3 MB</b>. PDF belum diproses otomatis—salin teksnya ke kotak teks terlebih dahulu.</li><li>Pilih <b>Simpan & indeks</b>. Sistem membagi teks menjadi bagian-bagian untuk pencarian; tunggu notifikasi berhasil sebelum meninggalkan halaman.</li><li>Gunakan ikon hapus untuk menghapus dokumen beserta bagiannya. Tindakan hapus tidak dapat dibatalkan dari halaman ini.</li></ol><p class="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-[11px]"><b>Perhatian:</b> pastikan Anda berwenang mengunggah dokumen dan jangan memasukkan data rahasia yang tidak boleh diakses oleh role pengguna yang berhak membuka menu.</p></section>
+      <section class="rounded-[20px] border bg-white p-4 sm:p-5 shadow-soft"><div class="flex items-center gap-3"><span class="w-9 h-9 rounded-xl bg-blue-50 text-blue-700 grid place-items-center"><i data-lucide="library" class="w-5 h-5"></i></span><div><h3 class="display text-[16px]">1. Bank Dokumen</h3><p class="text-[11px] text-slate-500">Siapkan sumber yang akan dicari AI Assistant.</p></div></div><ol class="mt-4 list-decimal pl-5 space-y-2 text-[12px] leading-relaxed text-slate-700"><li>Buka menu <b>Bank Dokumen</b>, masukkan judul, lalu pilih file teks atau tempel teks langsung.</li><li>Pilih PDF (maksimum <b>10 MB</b>) atau <b>.txt, .md, .csv, .json</b> (maksimum <b>3 MB</b>). PDF teks diekstrak per halaman lalu diindeks; PDF hasil scan/gambar tanpa lapisan teks perlu OCR terlebih dahulu.</li><li>Pilih <b>Simpan & indeks</b>. Sistem membagi teks menjadi bagian-bagian untuk pencarian; tunggu notifikasi berhasil sebelum meninggalkan halaman.</li><li>Gunakan ikon hapus untuk menghapus dokumen beserta bagiannya. Tindakan hapus tidak dapat dibatalkan dari halaman ini.</li></ol><p class="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-[11px]"><b>Perhatian:</b> pastikan Anda berwenang mengunggah dokumen dan jangan memasukkan data rahasia yang tidak boleh diakses oleh role pengguna yang berhak membuka menu.</p></section>
       <section class="rounded-[20px] border bg-white p-4 sm:p-5 shadow-soft"><div class="flex items-center gap-3"><span class="w-9 h-9 rounded-xl bg-violet-50 text-violet-700 grid place-items-center"><i data-lucide="sparkles" class="w-5 h-5"></i></span><div><h3 class="display text-[16px]">2. ARWANA AI Assistant</h3><p class="text-[11px] text-slate-500">Pilih agent; LLM memakai Edge Function setelah consent, selain itu jawaban lokal.</p></div></div><ol class="mt-4 list-decimal pl-5 space-y-2 text-[12px] leading-relaxed text-slate-700"><li>Buka <b>ARWANA AI Assistant</b>, pilih salah satu agent yang sesuai, atau gunakan template yang tersedia.</li><li>Ketik pertanyaan spesifik—misalnya agenda rapat, status Pokir, dokumen terkait, atau tenggat tindak lanjut—lalu tekan <b>Kirim</b>. Enter mengirim pertanyaan; Shift+Enter dapat dipakai untuk baris baru.</li><li>Untuk pertanyaan tentang aturan/dokumen, unggah sumber ke Bank Dokumen terlebih dahulu. Baca kutipan dan cocokkan kembali dengan dokumen aslinya.</li><li>Gunakan <b>Uji Koneksi</b> untuk memeriksa fungsi AI Edge. Persetujuan cloud bersifat opt-in; chat tercatat di akun Supabase, sedangkan Mode Lokal hanya di browser.</li></ol><p class="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-[11px]"><b>Batasan penting:</b> LLM hanya aktif jika Edge Function dideploy/dikonfigurasi dan consent dicentang. Jawaban adalah draf berbasis konteks terbatas, bukan nasihat hukum, verifikasi kepatuhan, atau pengesahan resmi. Periksa data, sumber, dan kewenangan sebelum bertindak.</p></section>
       <section class="rounded-[20px] border bg-white p-4 sm:p-5 shadow-soft"><div class="flex items-center gap-3"><span class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 grid place-items-center"><i data-lucide="file-spreadsheet" class="w-5 h-5"></i></span><div><h3 class="display text-[16px]">3. Pratinjau dan ekspor Excel</h3><p class="text-[11px] text-slate-500">Tersedia pada Bank Dokumen dan menu AKIP.</p></div></div><ol class="mt-4 list-decimal pl-5 space-y-2 text-[12px] leading-relaxed text-slate-700"><li>Pastikan data sudah dimuat dan pilih lingkup yang benar: Bank Dokumen, satu submenu AKIP, atau dashboard AKIP untuk seluruh modul.</li><li>Klik <b>Excel</b>. Pratinjau menampilkan jumlah baris dan contoh data tiap sheet sebelum file dibuat.</li><li>Tinjau judul sheet dan contoh baris, lalu pilih <b>Lanjutkan ekspor ke Excel</b> atau batalkan.</li><li>File berformat <b>.xlsx</b>. Ekspor dashboard AKIP membuat sheet terpisah untuk delapan modul; Bank Dokumen menyediakan sheet metadata dan bagian teks.</li></ol><p class="mt-3 text-[11px] text-slate-500">Library pembuat XLSX dimuat dari CDN saat diperlukan, sehingga perlu koneksi internet. Jika gagal, status di samping tombol menampilkan penyebab dan Anda dapat mencoba lagi.</p></section>
       <section class="rounded-[20px] border bg-white p-4 sm:p-5 shadow-soft"><div class="flex items-center gap-3"><span class="w-9 h-9 rounded-xl bg-rose-50 text-rose-700 grid place-items-center"><i data-lucide="file-text" class="w-5 h-5"></i></span><div><h3 class="display text-[16px]">4. Pratinjau dan ekspor PDF</h3><p class="text-[11px] text-slate-500">PDF dibuat melalui fitur cetak browser.</p></div></div><ol class="mt-4 list-decimal pl-5 space-y-2 text-[12px] leading-relaxed text-slate-700"><li>Klik <b>PDF</b> pada Bank Dokumen atau AKIP. Dialog pratinjau menampilkan jumlah baris dan contoh data yang akan dicetak.</li><li>Pilih <b>Lanjutkan ke PDF</b>. Browser membuka jendela laporan dan dialog cetak.</li><li>Pada pilihan printer/destinasi, pilih <b>Simpan sebagai PDF</b>, periksa ukuran/kertas, lalu simpan file.</li><li>Jika jendela tidak terbuka, izinkan popup untuk halaman ARWANA dan ulangi proses. Pratinjau tidak mengubah data.</li></ol></section>
@@ -1181,7 +1212,14 @@ window.exportRagExcel=exportRagExcel;window.exportRagPdf=exportRagPdf;window.exp
 async function handleLogin(e){e.preventDefault();const fd=new FormData(e.target),email=sanitizeInput(fd.get('email')).toLowerCase(),pw=fd.get('password');if(!validEmail(email)){document.getElementById('loginAlert').innerHTML='<div class="rounded-xl bg-amber-50 border border-amber-200 p-3 text-[13px]">Email tidak valid</div>';return;}if(!supa){toast('Supabase belum dikonfigurasi. Gunakan Mode Lokal hanya untuk demo.','warn');return;}try{const{data,error}=await supa.auth.signInWithPassword({email,password:pw});if(error)throw error;const{data:profile,error:pe}=await supa.from('profiles').select('*,bagian(nama)').eq('id',data.user.id).single();if(pe||!profile)throw new Error('Profil belum tersedia. Jalankan SQL dan buat profil pengguna.');session={id:profile.id,email:profile.email,nama_lengkap:profile.nama_lengkap,role:profile.role,bagian_id:profile.bagian_id,bagian_nama:profile.bagian?.nama||profile.role};localStorage.setItem(LS.sess,JSON.stringify(session));enterApp();}catch(err){document.getElementById('loginAlert').innerHTML=`<div class="rounded-xl bg-red-50 border border-red-200 p-3 text-[13px]">Login gagal: ${esc(err.message)}</div>`;}}
 async function checkSess(){if(supa){const{data}=await supa.auth.getSession();if(data?.session?.user){const{data:p,error}=await supa.from('profiles').select('*,bagian(nama)').eq('id',data.session.user.id).single();if(!error&&p){session={id:p.id,email:p.email,nama_lengkap:p.nama_lengkap,role:p.role,bagian_id:p.bagian_id,bagian_nama:p.bagian?.nama||p.role};return true;}}return false;}try{const r=localStorage.getItem(LS.sess);if(r){session=JSON.parse(r);return true;}}catch(e){}return false;}
 function enterApp(){applySavedDesignPatch();document.getElementById('loginView').classList.add('hidden');document.getElementById('appView').classList.remove('hidden');document.getElementById('appView').classList.add('flex');document.getElementById('userName').textContent=session.nama_lengkap||session.email;document.getElementById('userRole').textContent=ROLES[session.role]?.label||session.role;document.getElementById('userAvatar').textContent=(session.nama_lengkap||'A').charAt(0).toUpperCase();document.getElementById('chipRole').textContent='Role: '+(ROLES[session.role]?.chip||session.role);document.getElementById('chipBagian').textContent='Bagian: '+(session.bagian_nama||'-');loadData();}
-window.logout=function(){if(supa)supa.auth.signOut();localStorage.removeItem(LS.sess);session=null;for(const k of DATA_KEYS)state[k]=[];state.audit=[];state.aiChats=[];state.ragDocs=[];state.ragChunks=[];document.getElementById('appView').classList.add('hidden');document.getElementById('loginView').classList.remove('hidden');};
+window.logout=async function(){
+  const auth=supa?.auth||null;
+  localStorage.removeItem(LS.sess);session=null;
+  for(const k of DATA_KEYS)state[k]=[];state.audit=[];state.aiChats=[];state.ragDocs=[];state.ragChunks=[];
+  document.getElementById('appView').classList.add('hidden');document.getElementById('appView').classList.remove('flex');document.getElementById('loginView').classList.remove('hidden');
+  try{if(auth){const{error}=await auth.signOut({scope:'local'});if(error)throw error;}}
+  catch(err){console.error('Supabase local sign-out gagal:',err);toast('Tampilan sudah keluar, tetapi Supabase melaporkan kegagalan membersihkan sesi: '+(err?.message||err),'warn');}
+};
 async function loadData(){
   if(cloudSession()){
     try{
@@ -1206,7 +1244,7 @@ async function loadData(){
       }
       const{data:logs,error:le}=await supa.from('audit_logs').select('*').order('created_at',{ascending:false}).limit(500);if(!le)state.audit=logs||[];
       {
-        const{data:rd,error:re}=await supa.from('rag_documents').select('id,judul,jenis,created_at').order('created_at',{ascending:false});if(!re)state.ragDocs=rd||[];
+        const{data:rd,error:re}=await supa.from('rag_documents').select('id,judul,jenis,num_pages,created_at').order('created_at',{ascending:false});if(!re)state.ragDocs=rd||[];
         const{data:rc,error:ce}=await supa.from('rag_chunks').select('id,document_id,chunk_index,text').limit(5000);if(!ce)state.ragChunks=rc||[];
         const{data:ac,error:ae}=await supa.from('ai_chats').select('role,content,sources,created_at').eq('user_id',session.id).order('created_at',{ascending:true}).limit(200);
         if(!ae&&ac?.length)state.aiChats=ac.map(m=>({role:m.role,content:m.content,sources:m.sources||[],at:m.created_at}));
@@ -1227,6 +1265,7 @@ document.getElementById('configForm').addEventListener('submit',(e)=>{e.preventD
 document.getElementById('menuSearch').addEventListener('input',(e)=>renderNav(e.target.value));
 document.getElementById('btnCollapse').addEventListener('click',()=>{ const sb=document.getElementById('sidebar'); const mw=document.getElementById('mainWrap'); sb.classList.toggle('w-[320px]'); sb.classList.toggle('w-[84px]'); mw.classList.toggle('lg:ml-[320px]'); mw.classList.toggle('lg:ml-[84px]'); });
 document.getElementById('btnMobileMenu').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('-translate-x-full'));
+document.getElementById('btnLogout').addEventListener('click',()=>window.logout());
 
 (async()=>{ await initSupa(); const has=await checkSess(); if(has) enterApp(); lucide.createIcons(); })();
 </script>
