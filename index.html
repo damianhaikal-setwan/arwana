@@ -173,6 +173,11 @@ const AI_AGENTS={
     {t:'LAKIP Setwan',d:'Laporan AKIP',p:'Dari akip_plans, akip_measurements, akip_reports, buatkan narasi LAKIP Sekretariat DPRD tahun ini dengan capaian, hambatan, dan rekomendasi'},
     {t:'Dashboard PDF',d:'Export dashboard eksekutif',p:'Buatkan ringkasan eksekutif Dashboard Kendali untuk Sekretaris DPRD: total agenda, aspirasi, pokir, tindak lanjut, dengan chart dan rekomendasi'}
   ]},
+  arwanaku:{id:'arwanaku',label:'AI ARWANAku',short:'ARWANAku',desc:'Pengetahuan terpadu dari repo dan seluruh data Supabase yang dapat diakses sesi ini',ico:'brain-circuit',color:'from-cyan-600 to-blue-700',bg:'bg-cyan-50',border:'border-cyan-200',system:'Kamu adalah AI ARWANAku. Jawab hanya berdasarkan konteks repository dan data Supabase yang diberikan. Sebutkan sumber file/tabel/ID bila tersedia. Jika tidak ditemukan, katakan data belum ditemukan. Jangan mengarang, mengubah data, menjalankan SQL, atau mengklaim deploy.',prompts:[
+    {t:'Tanya seluruh ARWANA',d:'Cari jawaban lintas source code, dokumentasi, dan data operasional',p:'Jelaskan fitur yang saya tanyakan berdasarkan source repository dan data Supabase yang relevan. Sertakan sumber file dan tabel/ID.'},
+    {t:'Audit data & alur',d:'Temukan hubungan, gap, dan data yang belum tersedia',p:'Audit pertanyaan saya lintas repository dan data Supabase. Bedakan fakta, gap data, asumsi, dan langkah verifikasi tanpa mengubah data.'},
+    {t:'Ringkasan modul',d:'Ringkas isi modul dan rekaman terkait',p:'Buat ringkasan eksekutif untuk modul/fitur yang saya sebutkan berdasarkan sumber yang tersedia.'}
+  ]},
   akip_evidence:{id:'akip_evidence',label:'AKIP Evidence Assistant',short:'Evidence AKIP',desc:'Petakan bukti dan gap AKIP dari rekaman ARWANA',ico:'folder-check',color:'from-fuchsia-600 to-violet-700',bg:'bg-fuchsia-50',border:'border-fuchsia-200',system:'Kamu adalah AI Penyiapan Bukti Dukung AKIP Sekretariat DPRD. Gunakan hanya data yang tersedia, tunjukkan sumber/tabel/ID, jangan mengarang bukti atau nilai resmi.',prompts:[
     {t:'Peta bukti per indikator',d:'Cocokkan data AKIP dengan bukti yang tersedia',p:'Buat matriks sasaran/indikator, periode, bukti yang tersedia (tabel dan ID), kekurangan bukti, dan langkah melengkapi. Jangan mengarang.'},
     {t:'Siapkan paket evaluasi',d:'Daftar bukti sebelum telaah internal',p:'Susun checklist paket evidence evaluasi AKIP dari data ARWANA: rencana, indikator, pengukuran, laporan, evaluasi, kertas kerja, tindak lanjut, bukti. Tandai yang belum tersedia.'},
@@ -180,7 +185,8 @@ const AI_AGENTS={
     {t:'Ringkasan kesiapan',d:'Ringkas kesiapan bukti per periode',p:'Buat ringkasan kesiapan bukti AKIP per tahun/periode berdasarkan rekaman yang tersedia. Bedakan terdata, perlu verifikasi, dan belum tersedia; jangan memberi predikat/nilai resmi.'}
   ]}
 };
-let currentAIAgent = localStorage.getItem('arwana_current_agent') || 'design';
+let currentAIAgent = localStorage.getItem('arwana_current_agent') || 'arwanaku';
+let repoKnowledgeChunks=[];
 let _pokirEnabled = true;
 
 const PAGES=[
@@ -202,7 +208,7 @@ const PAGES=[
   {id:'anggaran_dprd',label:'KUA-PPAS & APBD',desc:'Pasal 14 a-d • GAP-3',ico:'bar-chart-3',group:'04 · Anggaran & Pengawasan',roles:['sekretaris_dprd','admin','kabag_anggaran_pengawasan']},
   {id:'pengawasan',label:'Pengawasan & LHP BPK',desc:'14 f,i,j,k • GAP-3',ico:'shield-alert',group:'04 · Anggaran & Pengawasan',roles:['sekretaris_dprd','admin','kabag_anggaran_pengawasan']},
   // AI ASSISTANT RESTORED - modern, interactive, innovative
-  {id:'aiassistant',label:'ARWANA AI Assistant',desc:'Tujuh agent via Supabase Edge Function • fallback lokal',ico:'sparkles',group:'06 · Kecerdasan Buatan',roles:Object.keys(ROLES),badge:'AI'},
+  {id:'aiassistant',label:'ARWANA AI Assistant',desc:'Delapan agent via Supabase Edge Function • fallback lokal',ico:'sparkles',group:'06 · Kecerdasan Buatan',roles:Object.keys(ROLES),badge:'AI'},
   {id:'ragbank',label:'Bank Dokumen',desc:'Unggah Perbup/Perda/notulen • dikutip Assistant',ico:'library',group:'06 · Kecerdasan Buatan',roles:Object.keys(ROLES)},
   {id:'userguide',label:'Panduan Pengguna',desc:'Panduan Bank Dokumen, AI Assistant, dan ekspor',ico:'book-open-check',group:'09 · Panduan',roles:Object.keys(ROLES)},
   {id:'org',label:'Struktur Organisasi',desc:'Pasal 5 Perbup 57/21',ico:'network',group:'05 · Tata Kelola',roles:Object.keys(ROLES)},
@@ -319,8 +325,8 @@ function renderAIAssistant(){
   <div class="space-y-4">
     <div class="rounded-[20px] border border-slate-200 bg-white p-4 shadow-soft">
       <div class="flex flex-wrap items-center justify-between gap-3">
-        <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-purple-600 grid place-items-center text-white"><i data-lucide="sparkles" class="w-5 h-5"></i></div><div><h2 class="display text-[18px] leading-tight">ARWANA AI Assistant v85.2 FIXED</h2><p class="text-[11px] text-slate-500">7 Agent • Secure Supabase Edge Function • AKIP Evidence</p></div></div>
-        <div class="flex items-center gap-2 text-[10px]"><span class="px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700">RLS • Supabase</span><span class="px-2.5 py-1 rounded-full bg-gold/15 border border-gold/30 text-gold">7 Agent • Edge Function</span></div>
+        <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-purple-600 grid place-items-center text-white"><i data-lucide="sparkles" class="w-5 h-5"></i></div><div><h2 class="display text-[18px] leading-tight">ARWANA AI Assistant v85.2 FIXED</h2><p class="text-[11px] text-slate-500">8 Agent • AI ARWANAku • Secure Supabase Edge Function</p></div></div>
+        <div class="flex items-center gap-2 text-[10px]"><span class="px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700">RLS • Supabase</span><span class="px-2.5 py-1 rounded-full bg-gold/15 border border-gold/30 text-gold">8 Agent • Edge Function</span></div>
       </div>
       <div class="mt-4 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-2">
         ${agentList.map(function(a){var active=a.id===currentAIAgent;return '<button onclick="switchAIAgent(\''+a.id+'\')" class="text-left p-3 rounded-xl border transition-all '+(active?'bg-navy text-white border-navy shadow-softLg':'bg-white border-slate-200 hover:border-violet-300')+'"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-gradient-to-br '+a.color+' grid place-items-center text-white flex-none"><i data-lucide="'+a.ico+'" class="w-4 h-4"></i></div><b class="text-[12px] leading-tight">'+esc(a.short)+'</b></div><p class="mt-2 text-[10px] leading-snug opacity-70">'+esc(a.desc)+'</p>'+(active?'<span class="mt-2 inline-flex text-[9px] px-2 py-0.5 rounded-full bg-white/20">AKTIF</span>':'')+'</button>';}).join('')}
@@ -347,6 +353,7 @@ function renderAIAssistant(){
               ${currentAIAgent==='sql'?'<div class="rounded-xl border bg-white p-3"><b class="text-[11px] uppercase">SQL Generator</b><div class="mt-2 flex gap-2"><button onclick="copySQL()" class="flex-1 py-2 rounded-xl bg-navy text-white text-[11px]">Copy</button><button onclick="downloadSQL()" class="flex-1 py-2 rounded-xl border text-[11px]">Download</button></div></div>':''}
               ${currentAIAgent==='regulation'?'<div class="rounded-xl border bg-white p-3"><b class="text-[11px] uppercase">Workflow</b><div class="mt-2 text-[11px]">'+workflowPreview+'</div><button onclick="generateWorkflow()" class="mt-2 w-full py-2 rounded-xl bg-blue-600 text-white text-[11px]">Analisis Bank Dokumen</button></div>':''}
               ${currentAIAgent==='evolution'?'<div class="rounded-xl border bg-white p-3"><b class="text-[11px] uppercase">Roadmap</b><div class="mt-2 text-[11px]">'+roadmapPreview+'</div></div>':''}
+              ${currentAIAgent==='arwanaku'?'<div class="rounded-xl border border-cyan-200 bg-cyan-50 p-3"><b class="text-[11px] uppercase">Knowledge Scope AI ARWANAku</b><p class="mt-2 text-[11px] leading-relaxed">Retrieval membaca seluruh rekaman yang dimuat sesuai RLS sesi ini, indeks source repository, dan Bank Dokumen. Field sensitif disaring sebelum dikirim ke model.</p><div class="mt-3 grid grid-cols-2 gap-1 text-[10px]"><span class="rounded-lg bg-white p-1.5">Tabel: <b>'+DATA_KEYS.length+'</b></span><span class="rounded-lg bg-white p-1.5">Repo chunks: <b>'+repoKnowledgeChunks.length+'</b></span><span class="rounded-lg bg-white p-1.5">Data rows: <b>'+DATA_KEYS.reduce((n,k)=>n+(state[k]||[]).length,0)+'</b></span><span class="rounded-lg bg-white p-1.5">RLS: <b>'+((cloudSession()?'aktif':'lokal'))+'</b></span></div><p class="mt-2 text-[10px] text-cyan-900">AI hanya membaca dan memberi jawaban/draf.</p></div>':''}
               ${currentAIAgent==='akip_evidence'?'<div class="rounded-xl border border-fuchsia-200 bg-fuchsia-50 p-3"><b class="text-[11px] uppercase">Data evidensi AKIP yang dimuat</b><div class="mt-2 grid grid-cols-2 gap-1 text-[10px]">'+['akip_plans','akip_indicators','akip_measurements','akip_reports','akip_evaluations','akip_workpapers','akip_followups','akip_evidence'].map(k=>'<span class="rounded-lg bg-white p-1.5">'+esc(k.replace('akip_',''))+': <b>'+(state[k]||[]).length+'</b></span>').join('')+'</div><button onclick="window.arwanaNavigate(&quot;akip_evidence&quot;)" class="mt-2 w-full rounded-lg bg-fuchsia-700 py-2 text-white text-[11px]">Buka menu Bukti Dukung</button><p class="mt-2 text-[10px]">Menyusun draf checklist; tidak menetapkan nilai resmi atau menyimpan data.</p></div>':''}
             </div>
           </div>
@@ -370,6 +377,7 @@ function renderAIAssistant(){
             ${currentAIAgent==='implementor'?'<div class="space-y-2 text-[12px]"><p>Aspirasi Masuk -> Verifikasi -> Tombol Jadikan Pokir aktif otomatis</p><button onclick="implementWorkflow()" class="px-4 py-2 rounded-xl bg-emerald-600 text-white">Generate JS</button><button onclick="enablePokirButton()" class="ml-2 px-4 py-2 rounded-xl border">Aktifkan Tombol Pokir</button></div>':''}
             ${currentAIAgent==='regulation'?'<div class="flex flex-wrap gap-2 text-[11px]">'+Object.entries(DB_ENTITY_BY_KEY).slice(0,8).map(function(kv){return '<span class="px-2 py-1 rounded-full bg-blue-50 border">'+kv[0]+'</span>';}).join('')+'</div>':''}
             ${currentAIAgent==='evolution'?'<div class="space-y-2">'+['v85 6-Agent FIXED','v86 SIPD-RI','v87 SAKIP Auto','v88 PWA','v89 AI Evaluator','v90 Dashboard Bupati'].map(function(v,i){return '<div class="flex gap-3 p-2 rounded-xl border '+(i===0?'bg-gold/10 border-gold/30':'bg-slate-50')+'"><b class="text-[11px]">v'+(85+i)+'</b><span class="text-[11px]">'+v+'</span></div>';}).join('')+'</div>':''}
+            ${currentAIAgent==='arwanaku'?'<div class="rounded-xl border border-cyan-200 bg-gradient-to-br from-cyan-50 to-blue-50 p-4"><div class="flex items-center gap-2"><i data-lucide="database-zap" class="w-4 h-4 text-cyan-700"></i><b class="text-[12px]">Cakupan pengetahuan aktif</b></div><p class="mt-2 text-[11px] text-slate-600">'+DATA_KEYS.length+' tabel data sesi · '+repoKnowledgeChunks.length+' chunk source repo · '+(state.ragChunks||[]).length+' chunk Bank Dokumen. Ketik pertanyaan spesifik agar retrieval memilih sumber relevan.</p></div>':''}
             ${currentAIAgent==='output'?'<div class="grid md:grid-cols-2 gap-3 text-[12px]"><button onclick="aiUseTemplateAgent(\'output\',0)" class="p-3 rounded-xl border bg-white text-left"><b>Nota Dinas</b></button><button onclick="exportDashboard()" class="p-3 rounded-xl border bg-navy text-white text-left"><b>Export Dashboard</b></button></div>':''}
           </div>
         </div>
@@ -477,9 +485,13 @@ function aiConsentKey(){return 'arwana_ai_llm_consent_'+(session?.id||'local');}
 function aiCloudConsentOk(){return localStorage.getItem(aiConsentKey())==='yes';}
 function setAICloudConsent(ok){localStorage.setItem(aiConsentKey(),ok?'yes':'no');toast(ok?'Persetujuan AI cloud disimpan untuk sesi ini.':'AI cloud dinonaktifkan; chat tetap dapat memakai Mode Lokal.','info');}
 function safeAIContextRow(row){const out={};for(const[k,v]of Object.entries(row||{})){if(/email|phone|telepon|alamat|password|token|secret|nik|nama_lengkap|nama_pengaju|penandatangan|penelaah|evaluator|pemilik|penanggung_jawab|file_url|signed_url/i.test(k))continue;if(typeof v==='string'){if(/^data:/i.test(v))continue;out[k]=v.slice(0,1200);}else if(v===null||['number','boolean'].includes(typeof v))out[k]=v;}return out;}
+function aiRagRepo(q,n=8){const ws=aiTok(q),chunks=repoKnowledgeChunks||[];if(!ws.length||!chunks.length)return[];return chunks.map(c=>{const text=aiNorm((c.file_path||'')+' '+(c.title||'')+' '+(c.content||''));const score=ws.reduce((sum,w)=>sum+(text.includes(w)?1:0),0);return{c,score};}).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,n).map(x=>x.c);}
+function aiAllDataMatches(q,limit=30){const all=DATA_KEYS.flatMap(k=>(state[k]||[]).map(r=>({...safeAIContextRow(r),source_table:k})));return aiPick(all,q,limit);}
+function aiBuildArwanakuLocal(prompt){const records=aiAllDataMatches(prompt,30),repo=aiRagRepo(prompt,10),docs=aiRag(prompt,8),counts=Object.fromEntries(DATA_KEYS.map(k=>[k,(state[k]||[]).length]));const sources=[...repo.map(c=>({type:'repository',title:c.title||c.file_path,location:c.file_path,excerpt:String(c.content||'').slice(0,280)})),...docs.map(c=>({type:'document',title:((state.ragDocs||[]).find(x=>x.id===c.document_id)||{}).judul||'Bank Dokumen',location:'chunk '+((c.chunk_index??0)+1),excerpt:String(c.text||'').slice(0,280)})),...records.slice(0,12).map(r=>({type:'supabase',title:String(r.source_table),location:String(r.id||'record'),excerpt:JSON.stringify(r).slice(0,280)}))];const text='AI ARWANAku — retrieval lintas sumber\n\nData Supabase per tabel:\n'+Object.entries(counts).map(([k,v])=>'• '+k+': '+v+' rekaman').join('\n')+'\n\nRekaman relevan:\n'+(records.slice(0,12).map(r=>'• '+r.source_table+' / '+(r.id||'-')+' — '+JSON.stringify(r)).join('\n')||'Tidak ada yang cocok.')+'\n\nSource repository relevan:\n'+(repo.slice(0,6).map(c=>'• '+(c.file_path||c.title||'repo')+' — '+String(c.content||'').replace(/\s+/g,' ').slice(0,360)).join('\n')||'Belum ada indeks repository atau tidak ada kecocokan.')+'\n\nBatasan: mode lokal hanya retrieval; periksa sumber asli, RLS, dan kewenangan.';return{text,sources};}
 function aiBuildContext(agent,prompt){
   const countMap=Object.fromEntries(DATA_KEYS.map(k=>[k,(state[k]||[]).length]));
   const rows=(key,n=10)=>(state[key]||[]).slice(0,n).map(safeAIContextRow);
+  if(agent==='arwanaku'){const repo=aiRagRepo(prompt,10).map(c=>({file_path:c.file_path,title:c.title,chunk_index:c.chunk_index,content:String(c.content||'').slice(0,1800)}));const docs=aiRag(prompt,8).map(c=>({document_id:c.document_id,chunk_index:c.chunk_index,text:String(c.text||'').slice(0,1200)}));return{scope:'AI ARWANAku: retrieval data sesi sesuai RLS + repository terindeks; field sensitif disaring',role:session?.role||'local',counts:countMap,matching_records:aiAllDataMatches(prompt,30),repository_chunks:repo,bank_dokumen_chunks:docs,schema:Object.fromEntries(DATA_KEYS.map(k=>[k,Object.keys((state[k]||[])[0]||{})]))};}
   if(agent==='akip_evidence'){
     const keys=['akip_plans','akip_indicators','akip_measurements','akip_reports','akip_evaluations','akip_workpapers','akip_followups','akip_evidence','dprd_workplans','meetings','attendance','reses_reports','dprd_decisions','pengawasan'];
     return {scope:'rekaman yang sudah dimuat dan dapat diakses oleh sesi ini; baris dibatasi dan field pribadi dihilangkan',tables:Object.fromEntries(keys.map(k=>[k,rows(k,k.startsWith('akip_')?12:5)])),counts:Object.fromEntries(keys.map(k=>[k,(state[k]||[]).length]))};
@@ -500,7 +512,7 @@ function aiEvidenceLocal(prompt){
   const lines=keys.map(k=>{const rows=state[k]||[];const label=k.replace('akip_','');return `• ${label}: ${rows.length} rekaman`+(rows.length?' — '+rows.slice(0,3).map(r=>`${r.tahun||'tahun ?'} | ${r.indikator||r.nama||r.judul_bukti||r.sasaran||r.rekomendasi||r.komponen||'-'} | ${r.status||'status belum dicatat'}`).join('; '):' — belum tersedia');});
   return {text:`DRAF PEMETAAN EVIDENCE AKIP (analisis lokal)\nPermintaan: ${prompt}\n\nRekaman saat ini:\n${lines.join('\n')}\n\nLangkah kerja: cocokkan indikator dan target dengan pengukuran/realisasi; tautkan laporan dan kertas kerja; catat bukti dokumen, periode, sumber/pemilik, dan status verifikasi pada menu Bukti Dukung AKIP.\n\nBatasan: ringkasan ini hanya menghitung rekaman yang dimuat dan tidak memeriksa isi lampiran/keabsahan dokumen, tidak mengarang bukti, serta bukan nilai/predikat resmi. Telaah dokumen sumber dan validasi oleh tim evaluator.` ,sources:[],css_patch:null};
 }
-function aiAgentLocalAnswer(agent,prompt){return agent==='akip_evidence'?aiEvidenceLocal(prompt):aiAnswer(prompt);}
+function aiAgentLocalAnswer(agent,prompt){if(agent==='arwanaku')return aiBuildArwanakuLocal(prompt);return agent==='akip_evidence'?aiEvidenceLocal(prompt):aiAnswer(prompt);}
 async function invokeArwanaAI(agent,prompt){
   if(!supa||!cloudSession())throw new Error('Sesi Supabase cloud diperlukan.');
   if(!aiCloudConsentOk())throw new Error('Persetujuan AI cloud belum diberikan; gunakan Mode Lokal atau centang persetujuan.');
@@ -609,38 +621,7 @@ function exportDashboard(){
   state.aiChats.push({role:'assistant', agent:'output', content:content, at:new Date().toISOString()});
   saveLocal(); renderPage();
 }
-function aiSendAgent(){
-  var input=document.getElementById('aiInput');
-  if(!input) return;
-  var prompt=input.value.trim();
-  if(!prompt) return;
-  var agent = AI_AGENTS[currentAIAgent];
-  state.aiChats.push({role:'user', agent:currentAIAgent, content:prompt, at:new Date().toISOString()});
-  input.value='';
-  var typing=document.getElementById('aiTyping'); if(typing) typing.classList.remove('hidden');
-  setTimeout(function(){
-    var response='';
-    if(currentAIAgent==='design'){
-      response='[Design AI] Perintah: "'+prompt+'" -> Patch: rounded-[22px], shadow-softLg';
-    } else if(currentAIAgent==='regulation'){
-      var base = typeof aiLocalBase==='function'?aiLocalBase(prompt):prompt;
-      response=base + ' [Regulation Reader] Dokumen: '+(state.ragDocs||[]).length;
-    } else if(currentAIAgent==='implementor'){
-      response='[Workflow Builder] Implementasi untuk: "'+prompt+'"';
-    } else if(currentAIAgent==='sql'){
-      response='[SQL Architect] SQL generated: '+Object.keys(DB_ENTITY_BY_KEY).length+' tabel. Lihat workspace.';
-    } else if(currentAIAgent==='evolution'){
-      response='[Evolution Planner] Roadmap v85 FIXED, v86 SIPD-RI, v87 SAKIP Auto';
-    } else {
-      var base2 = typeof aiLocalBase==='function'?aiLocalBase(prompt):prompt;
-      response=base2 + ' [Output Forge] Output siap';
-    }
-    state.aiChats.push({role:'assistant', agent:currentAIAgent, content:response, at:new Date().toISOString()});
-    saveLocal();
-    var typing2=document.getElementById('aiTyping'); if(typing2) typing2.classList.add('hidden');
-    renderPage();
-  },600);
-}
+function aiSendAgent(){ return aiSend(); }
 window.aiSend = function(){
   if(document.getElementById('aiInput')){
     aiSendAgent();
@@ -1213,7 +1194,7 @@ function enterApp(){applySavedDesignPatch();document.getElementById('loginView')
 window.logout=async function(){
   const auth=supa?.auth||null;
   localStorage.removeItem(LS.sess);session=null;
-  for(const k of DATA_KEYS)state[k]=[];state.audit=[];state.aiChats=[];state.ragDocs=[];state.ragChunks=[];
+  for(const k of DATA_KEYS)state[k]=[];state.audit=[];state.aiChats=[];state.ragDocs=[];state.ragChunks=[];repoKnowledgeChunks=[];
   document.getElementById('appView').classList.add('hidden');document.getElementById('appView').classList.remove('flex');document.getElementById('loginView').classList.remove('hidden');
   try{if(auth){const{error}=await auth.signOut({scope:'local'});if(error)throw error;}}
   catch(err){console.error('Supabase local sign-out gagal:',err);toast('Tampilan sudah keluar, tetapi Supabase melaporkan kegagalan membersihkan sesi: '+(err?.message||err),'warn');}
@@ -1244,6 +1225,9 @@ async function loadData(){
       {
         const{data:rd,error:re}=await supa.from('rag_documents').select('id,judul,jenis,num_pages,created_at').order('created_at',{ascending:false});if(!re)state.ragDocs=rd||[];
         const{data:rc,error:ce}=await supa.from('rag_chunks').select('id,document_id,chunk_index,text').limit(5000);if(!ce)state.ragChunks=rc||[];
+        const{data:repoChunks,error:repoError}=await supa.from('arwana_knowledge_chunks').select('repository,file_path,title,content,chunk_index,commit_sha').order('file_path',{ascending:true}).order('chunk_index',{ascending:true}).limit(10000);
+        repoKnowledgeChunks=repoError?[]:(repoChunks||[]);
+        if(repoError)console.info('Indeks repository belum tersedia atau RLS menolak pembacaan:',repoError.message||repoError);
         const{data:ac,error:ae}=await supa.from('ai_chats').select('role,content,sources,created_at').eq('user_id',session.id).order('created_at',{ascending:true}).limit(200);
         if(!ae&&ac?.length)state.aiChats=ac.map(m=>({role:m.role,content:m.content,sources:m.sources||[],at:m.created_at}));
       }
