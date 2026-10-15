@@ -33,6 +33,7 @@ Dari root proyek Supabase yang benar:
 
 ```bash
 supabase link --project-ref PROJECT_REF
+supabase db push
 supabase functions deploy arwana-ai
 ```
 
@@ -50,17 +51,17 @@ supabase secrets set \
 
 Jangan menggunakan `OPENAI_API_KEY`, `OPENAI_MODEL`, atau `ARWANA_ALLOWED_USERS` untuk fungsi yang ada saat ini; variabel tersebut tidak dibaca oleh `supabase/functions/arwana-ai/index.ts`. Akses fungsi didasarkan pada JWT Supabase dan role pada `profiles`, bukan email allowlist tersebut.
 
-## Prasyarat rate limit
+## Rate limit
 
-Fungsi memanggil RPC `arwana_ai_consume_rate` untuk membatasi penggunaan hingga 25 permintaan per pengguna per menit. Repository saat ini **belum menyertakan file migration** yang membuat RPC/tabel rate-limit tersebut. Pastikan migration yang sesuai sudah diterapkan di proyek Supabase sebelum menguji chat. Jika RPC tidak tersedia, fungsi mengembalikan 503. Perubahan dokumentasi ini tidak membuat atau mengubah migration.
+Repository menyertakan migration `supabase/migrations/20261015000000_arwana_ai_rate_limit.sql`. Jalankan `supabase db push` sebelum menguji chat. Migration membuat penghitung atomik per pengguna per menit dan RPC `arwana_ai_consume_rate`; akses RPC hanya diberikan ke role server `service_role`, bukan browser. Jika migration belum diterapkan, Edge Function mengembalikan 503.
 
 ## Uji setelah deploy
 
-1. Jalankan skrip read-only [`diagnostics/ARWANA-Check-DB-Profiles-RLS.sql`](diagnostics/ARWANA-Check-DB-Profiles-RLS.sql) di Supabase SQL Editor. Skrip menampilkan status tabel `profiles`, RLS, rincian policy, dan grant. Skrip tidak mengubah database.
+1. Jalankan skrip read-only [`ARWANA-Check-DB-Profiles-RLS.sql`](ARWANA-Check-DB-Profiles-RLS.sql) di Supabase SQL Editor. Skrip menampilkan status tabel `profiles`, RLS, rincian policy, dan grant. Skrip tidak mengubah database.
 2. Login ke situs ARWANA menggunakan akun yang memiliki baris profil dan role yang diizinkan.
 3. Buka **ARWANA AI Assistant**, berikan consent cloud, lalu tekan **Uji Koneksi**.
 4. Health check memeriksa JWT, profil/role, konfigurasi fungsi, dan keberadaan secret LLM. Health check **tidak** mengirim prompt ke model. Kirim prompt pendek untuk menguji provider sebenarnya.
-5. Ikuti [Panduan Uji Edge Function ARWANA](docs/ARWANA-Edge-Function-Pengujian.md) untuk prompt setiap agent dan diagnosis kode respons.
+5. Ikuti [Panduan Uji Supabase Edge Function ARWANA](Panduan%20Uji%20Supabase%20Edge%20Function%20ARWANA.md) untuk prompt setiap agent dan diagnosis kode respons.
 6. Tinjau log di **Supabase Dashboard → Edge Functions → `arwana-ai` → Logs**.
 
 Jalankan pengujian dengan data nonrahasia. Chat yang lolos health check dapat memanggil provider dan menimbulkan biaya sesuai akun provider. Tinjau akses instansi, retensi, RLS/grant, dan ketentuan layanan sebelum penggunaan data riil. SQL Architect hanya menghasilkan draft; jangan menerapkan SQL atau policy tanpa review dan uji staging.

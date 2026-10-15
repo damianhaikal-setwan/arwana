@@ -1,90 +1,58 @@
-# ARWANA AI — Starter Deployment Pack — V7.38
+# ARWANA — AI Assistant dan Deployment
 
-Paket integrasi AI untuk ARWANA Perencanaan Terpadu. Frontend tetap HTML statis; autentikasi dan pemanggilan model AI berjalan melalui Supabase Edge Function. Tidak ada kredensial akun pengguna atau secret yang disertakan.
+Aplikasi ARWANA adalah frontend HTML statis. Layanan model berjalan di server melalui Supabase Edge Function `arwana-ai`; kunci provider tidak boleh dimasukkan ke browser atau repository.
 
-## PWA (Progressive Web App)
+## Status integrasi AI
 
-Paket ini sudah menyertakan `manifest.webmanifest`, `service-worker.js`, ikon PNG 192/512 dan SVG, meta Apple/iOS, serta tombol pemasangan. Cloudflare Pages wajib menggunakan HTTPS agar service worker dan instalasi bekerja. Cache hanya menyimpan app shell/aset lokal; permintaan Supabase Auth, Edge Functions, dan API tidak pernah disimpan di cache. Mode offline hanya menyediakan shell aplikasi, bukan sinkronisasi data atau kemampuan AI offline. Pada iPhone, buka melalui Safari → Bagikan → Tambahkan ke Layar Utama.
+- Menu memiliki tujuh agent dan mengirim chat ke `supabase.functions.invoke('arwana-ai')` saat pengguna login ke Supabase dan memberi consent cloud.
+- Tanpa login/consent cloud, aplikasi memberi jawaban fallback lokal. Itu bukan respons LLM; UI menandainya sebagai fallback.
+- Edge Function memvalidasi JWT, baris `profiles` dan role, origin, consent, ukuran konteks, rate limit, lalu memanggil endpoint OpenAI-compatible Chat Completions.
+- `Uji Koneksi AI` hanya memeriksa sesi, profil/role dan keberadaan secret. Tes itu tidak mengirim prompt ke model; kirim prompt singkat nonrahasia untuk menguji provider sebenarnya.
+- Kode sumber saja tidak membuktikan bahwa Edge Function, secret, migration, atau aplikasi sudah terpasang pada deployment tertentu.
 
-## Status nyata paket
+## Deploy Supabase
 
-- HTML ARWANA berbasis V7.36 dipertahankan; menu ARWANA AI ditambahkan dan login Supabase Auth diintegrasikan.
-- UI koneksi menggunakan Supabase URL + anon/publishable key.
-- Login/logout menggunakan Supabase Auth SDK; access token diambil dari sesi aktif, tidak ditempel manual.
-- Edge Function memvalidasi token pengguna dan memanggil OpenAI Responses API dari server.
-- Konteks yang dikirim dibatasi pada metadata dokumen perencanaan, data kinerja, target, dan relasi. Tanda tangan, data pegawai, anggota DPRD, dan perjalanan dinas tidak dikirim oleh fungsi pembentuk konteks ini.
-- Hasil AI hanya berupa draf/rekomendasi; tidak menulis otomatis ke data bisnis.
-- Pemeriksaan statis tersedia di `scripts/check_html.py` dan workflow GitHub Actions.
+Jalankan dari root repository dengan Supabase CLI pada project yang benar:
 
-**Belum dilakukan:** deploy ke akun GitHub/Supabase/Cloudflare milik pengguna, konfigurasi secrets di akun, atau pengujian end-to-end di browser/iPhone. Itu memerlukan akses ke akun dan kredensial milik pengguna. Jangan mengirimkan password atau secret ke percakapan.
+```sh
+supabase login
+supabase link --project-ref PROJECT_REF
+supabase db push
+supabase functions deploy arwana-ai
+```
 
-## 1. Siapkan GitHub
+`supabase db push` menerapkan migration `supabase/migrations/20261015000000_arwana_ai_rate_limit.sql`. Migration tersebut membuat penghitung per pengguna per menit dan RPC `arwana_ai_consume_rate`; hanya `service_role` yang dapat memanggil RPC, dan browser tidak mendapat akses ke tabelnya. Chat mengembalikan 503 jika migration belum diterapkan.
 
-1. Buat repositori GitHub **Private** bernama `arwana-ai`.
-2. Ekstrak ZIP ini, lalu unggah seluruh isi folder (termasuk folder tersembunyi `.github`) ke root repositori.
-3. Commit `index.html`, folder `supabase/`, `scripts/`, `.github/`, `_headers`, `.gitignore`, dan `README.md`.
-4. Jangan mengunggah JSON data riil, file `.env`, token, `OPENAI_API_KEY`, atau service-role key.
-5. GitHub Actions otomatis memeriksa sintaks inline JavaScript pada `index.html` saat push.
+Set konfigurasi provider dan origin secara aman di Supabase (jangan commit nilainya):
 
-## 2. Siapkan Supabase Auth dan Edge Function
+```sh
+supabase secrets set --project-ref PROJECT_REF \
+  ARWANA_LLM_API_KEY='ISI_SECRET_PROVIDER' \
+  ARWANA_LLM_CHAT_URL='https://api.openai.com/v1/chat/completions' \
+  ARWANA_LLM_MODEL='gpt-4o-mini' \
+  ARWANA_ALLOWED_ORIGINS='https://HOST-ARWANA-ANDA'
+```
 
-Di Supabase Dashboard:
+`ARWANA_ALLOWED_ORIGINS` harus cocok persis dengan origin HTTPS situs (scheme dan host, tanpa path); pisahkan beberapa origin dengan koma. Function juga menggunakan `SUPABASE_URL`, `SUPABASE_ANON_KEY`, dan `SUPABASE_SERVICE_ROLE_KEY` dari environment server Supabase. Pastikan ketiganya tersedia di Edge Functions; `service_role` hanya untuk server, jangan pernah menaruhnya di HTML.
 
-1. Buka **Authentication → Users**, buat pengguna uji secara administratif. Matikan sign-up publik jika tidak dibutuhkan.
-2. Ambil Project URL dan anon/publishable key. Keduanya digunakan di browser; **jangan gunakan service-role key**.
-3. Pada komputer pengembang, pasang Supabase CLI, login, lalu tautkan direktori ini ke project yang benar:
+Buat akun pengguna melalui Supabase Auth. Pengguna perlu baris di `public.profiles` dengan `id` yang sama dengan UUID Auth dan role yang diizinkan oleh Edge Function: `sekretaris_dprd`, `admin`, `kabag_umum_keuangan`, `kabag_persidangan_perundang`, `kabag_anggaran_pengawasan`, atau `staf`. Agent `akip_evidence` hanya tersedia untuk role pengelola yang tercantum di kode. Jangan mengaktifkan pendaftaran publik kecuali memang dibutuhkan.
 
-   ```bash
-   supabase login
-   supabase link --project-ref PROJECT_REF
-   supabase functions deploy arwana-ai
-   ```
+## Deploy frontend
 
-4. Set secret server-side (jangan menaruh nilai secret dalam Git):
+Hubungkan repository ke Cloudflare Pages: framework preset **None**, build command kosong, output directory `/` (root), dan gunakan HTTPS. Aplikasi menyertakan URL Supabase dan anon key publik sebagai konfigurasi awal; halaman login menyediakan **Config** untuk menggantinya. Jika diganti, gunakan URL dan anon/publishable key dari project yang juga menjalankan Edge Function. Jangan pernah memasukkan service-role key atau key provider ke browser.
 
-   ```bash
-   supabase secrets set OPENAI_API_KEY=ISI_SECRET_OPENAI
-   supabase secrets set OPENAI_MODEL=gpt-4.1-mini
-   supabase secrets set ARWANA_ALLOWED_USERS=operator@instansi.go.id,sekwan@instansi.go.id
-   supabase secrets set ARWANA_ALLOWED_ORIGINS=https://DOMAIN-ARWANA.pages.dev
-   ```
+## Verifikasi setelah deploy
 
-   Jika memakai domain kustom, masukkan origin itu juga, dipisahkan koma. Contoh: `https://arwana.pages.dev,https://arwana.example.go.id`. Jangan masukkan path URL.
+1. Login dengan akun uji yang memiliki profil dan role yang valid.
+2. Buka **ARWANA AI Assistant**, baca pernyataan privasi, lalu centang consent cloud.
+3. Tekan **Uji Koneksi AI**. Ini memeriksa autentikasi, profil/role dan keberadaan secret, bukan ketersediaan provider.
+4. Kirim prompt pendek nonrahasia. Respons yang berhasil melewati Edge Function ditandai nama model; respons fallback lokal diberi label terpisah.
+5. Periksa **Supabase Dashboard → Edge Functions → arwana-ai → Logs** bila prompt gagal.
 
-5. `SUPABASE_URL` dan `SUPABASE_ANON_KEY` biasanya tersedia otomatis untuk Edge Functions. Jika proyek menggunakan nama secret berbeda, sesuaikan dengan environment proyek.
-6. Konfigurasi function ada di `supabase/config.toml`, dengan verifikasi JWT aktif. Function memvalidasi pengguna melalui `auth.getUser()` dan memeriksa allowlist `ARWANA_ALLOWED_USERS`. Masukkan hanya email akun yang memang diberi izin; pisahkan beberapa email dengan koma. Tanpa allowlist, function gagal tertutup dan tidak memproses permintaan.
-7. Jangan gunakan data pribadi/riil sebelum kebijakan keamanan, izin instansi, retensi, dan ketentuan penggunaan layanan AI ditinjau. Function AI ini tidak memerlukan akses service-role/database; ia hanya memvalidasi sesi dan memproses konteks terbatas yang dikirim frontend.
+Diagnosis singkat: 401 = token/sesi; 403 = origin, profil/role atau izin agent; 503 = secret atau migration rate limit; 429 = batas 25 permintaan per pengguna per menit; 502 = provider/model/kuota. CORS origin juga harus benar.
 
-## 3. Deploy Cloudflare Pages dari GitHub
+Jangan gunakan data rahasia/terklasifikasi. Prompt cloud dan konteks terbatas dikirim ke provider model eksternal dan dapat menimbulkan biaya. Hasil AI adalah draf/rekomendasi, bukan verifikasi hukum atau keputusan resmi; AI tidak mengubah data operasional secara otomatis. Data aplikasi prototipe masih dapat berada di `localStorage`; login AI tidak otomatis memigrasikan atau melindungi data tersebut dengan RLS.
 
-1. Buka Cloudflare Dashboard → **Workers & Pages → Create → Pages → Connect to Git**.
-2. Pilih repositori `arwana-ai`.
-3. Framework preset: **None**.
-4. Build command: kosong / none.
-5. Build output directory: `/` (root repositori).
-6. Deploy. Setelah domain `*.pages.dev` tersedia, set `ARWANA_ALLOWED_ORIGINS` di Supabase dengan origin yang tepat, lalu deploy ulang Edge Function bila diperlukan.
-7. Pada halaman ARWANA → menu **ARWANA AI Assistant**, isi:
-   - URL proyek Supabase, contoh `https://PROJECT_REF.supabase.co`
-   - anon/publishable key
-   - URL function, contoh `https://PROJECT_REF.supabase.co/functions/v1/arwana-ai`
-8. Simpan, login menggunakan akun Supabase Auth yang dibuat pengelola, lalu tekan **Uji Koneksi AI**.
+## Pemeriksaan statis
 
-## 4. Tes end-to-end setelah deployment
-
-- Login benar berhasil; password salah ditolak.
-- Tanpa login, panggilan AI harus ditolak dengan 401.
-- `Uji Koneksi AI` mengembalikan jawaban singkat.
-- Perintah analisis memakai data perencanaan aktif dan tidak mengirim data pegawai, tanda tangan, anggota DPRD, atau perjalanan dinas.
-- Origin yang tidak diizinkan ditolak setelah `ARWANA_ALLOWED_ORIGINS` disetel.
-- Secret yang tidak ada menghasilkan pesan konfigurasi generik; nilai secret tidak dikirim ke browser.
-- Token kedaluwarsa meminta login ulang.
-- Hasil AI dapat disalin/diunduh TXT, dan tidak mengubah data master secara otomatis.
-- Uji Safari macOS, iPhone, responsif, jaringan gagal, kuota API, dan log function.
-
-## Batasan keamanan yang belum digantikan paket ini
-
-- Data operasional utama pada versi prototipe masih menggunakan `localStorage` browser, bukan database bersama Supabase. Login AI **tidak** otomatis memindahkan data aplikasi atau menjamin RLS pada data lokal.
-- Batasi akses repositori, akun Supabase, OpenAI API, dan Cloudflare menurut kebijakan instansi.
-- Tambahkan rate limiting/kuota berbasis penyimpanan server-side sebelum penggunaan luas; batas sederhana di memori Edge Function tidak cukup untuk produksi.
-- Gunakan RLS dan pengujian role bila nanti data bisnis dimigrasikan ke Supabase.
-- AI bukan APIP/evaluator, tidak memberi skor/predikat resmi SAKIP, tidak mengesahkan dokumen, dan tidak boleh mengarang target atau realisasi.
+Jalankan `python3 scripts/check_html.py` dari root repository untuk pemeriksaan HTML/JavaScript inline dan pemindaian secret sederhana.
