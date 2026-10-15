@@ -7,7 +7,7 @@ Uji enam agent umum: `design`, `regulation`, `implementor`, `sql`, `evolution`, 
 ## 1. Pemeriksaan database dan RLS `profiles`
 
 1. Buka **Supabase Dashboard → SQL Editor** pada proyek yang benar.
-2. Jalankan skrip read-only [`ARWANA-Check-DB-Profiles-RLS.sql`](../diagnostics/ARWANA-Check-DB-Profiles-RLS.sql).
+2. Jalankan skrip read-only [`ARWANA-Check-DB-Profiles-RLS.sql`](ARWANA-Check-DB-Profiles-RLS.sql).
 3. Pada hasil pertama, periksa `profiles_exists = true`, `rls_enabled = true`, dan status diagnostik. RLS aktif saja belum membuktikan ekspresi policy sudah aman.
 4. Periksa hasil kedua untuk role, command, `USING`, dan `WITH CHECK`. Policy permissive `SELECT` dengan `USING (true)` berpotensi membuka seluruh baris yang dapat dibaca oleh role tersebut.
 5. Hasil ketiga menampilkan privilege tabel untuk `anon` dan `authenticated`.
@@ -21,12 +21,13 @@ Skrip hanya membaca katalog database; tidak mengubah data atau policy. SQL Edito
 - `ARWANA_ALLOWED_ORIGINS` harus cocok persis dengan origin hosting, termasuk `https://` tetapi tanpa path. Domain aktual harus diambil dari deployment Cloudflare Pages, bukan ditebak dari URL GitHub.
 - Fungsi juga memerlukan `SUPABASE_URL`, `SUPABASE_ANON_KEY`, dan `SUPABASE_SERVICE_ROLE_KEY` di server. Jangan pernah mengekspos service-role key ke browser.
 - Pertahankan `verify_jwt = true` di `supabase/config.toml`.
-- Fungsi memanggil RPC `arwana_ai_consume_rate` dan mengembalikan 503 jika RPC tidak tersedia. Repository ini saat ini tidak memiliki migration rate-limit di `supabase/migrations`; pastikan migration terkait sudah diterapkan di proyek Supabase sebelum uji chat. Panduan ini tidak membuat atau mengubah migration.
+- Repository menyertakan migration `supabase/migrations/20261015000000_arwana_ai_rate_limit.sql`. Jalankan `supabase db push` sebelum uji chat. Migration membuat RPC `arwana_ai_consume_rate` dengan penghitung atomik per pengguna per menit; hanya `service_role` yang boleh memanggilnya. Jika belum diterapkan, Edge Function mengembalikan 503.
 
 Contoh deploy fungsi (jalankan dari root proyek Supabase yang benar):
 
 ```bash
 supabase link --project-ref PROJECT_REF
+supabase db push
 supabase functions deploy arwana-ai
 ```
 
