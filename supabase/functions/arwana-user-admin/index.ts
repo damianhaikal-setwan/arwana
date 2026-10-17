@@ -9,6 +9,8 @@ const corsHeaders = {
 
 const ALLOWED_ROLES = new Set([
   "sekretaris_dprd",
+  "pimpinan_dprd",
+  "anggota_dprd",
   "admin",
   "kabag_umum_keuangan",
   "kabag_persidangan_perundang",
@@ -127,6 +129,21 @@ Deno.serve(async (req: Request) => {
       if (!data) throw new Error("Bagian yang dipilih tidak ditemukan di master Struktur Organisasi.");
       return value;
     }
+    async function checkDprdMemberLink(role: string, rawMemberId: unknown): Promise<string | null> {
+      const needsMemberLink = role === "pimpinan_dprd" || role === "anggota_dprd";
+      const memberId = cleanText(rawMemberId, 64) || null;
+      if (!needsMemberLink) return null;
+      if (!isSekwan) throw new Error("Hanya Sekretaris DPRD yang dapat membuat atau mengubah pemetaan akun Pimpinan/Anggota DPRD.");
+      if (!memberId || !validUuid(memberId)) throw new Error("Role Pimpinan/Anggota DPRD wajib ditautkan ke data Master Anggota DPRD.");
+      const { data, error } = await adminClient.from("members")
+        .select("id,nama,jabatan_dprd,is_active")
+        .eq("id", memberId)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data) throw new Error("Anggota yang dipilih tidak ditemukan di Master Anggota DPRD.");
+      if (data.is_active === false) throw new Error("Master Anggota DPRD yang dipilih tidak aktif.");
+      return memberId;
+    }
     async function activeSekwanCount(): Promise<number> {
       const { data, error } = await adminClient.from("profiles").select("id").eq("role", "sekretaris_dprd").eq("is_active", true);
       if (error) throw error;
@@ -134,8 +151,8 @@ Deno.serve(async (req: Request) => {
     }
     function mayManageTarget(target: Profile | null, targetId: string): string | null {
       if (targetId === caller.id) return "Akun yang sedang digunakan tidak boleh dihapus atau dinonaktifkan dari menu ini.";
-      if (!isSekwan && (!target || ["sekretaris_dprd", "admin"].includes(target.role) || target.can_manage_users === true)) {
-        return "Admin delegasi hanya dapat mengelola akun staf/bagian, bukan akun penguasa atau admin lain.";
+      if (!isSekwan && (!target || ["sekretaris_dprd", "admin", "pimpinan_dprd", "anggota_dprd"].includes(target.role) || target.can_manage_users === true)) {
+        return "Admin delegasi hanya dapat mengelola akun staf/bagian, bukan akun Sekretaris, admin, Pimpinan, atau Anggota DPRD.";
       }
       return null;
     }
@@ -155,11 +172,18 @@ Deno.serve(async (req: Request) => {
       if (profileError) throw profileError;
       const { data: bagianRows, error: bagianError } = await adminClient.from("bagian").select("id,kode,nama").order("nama");
       if (bagianError) throw bagianError;
+      const { data: memberRows, error: memberError } = await adminClient.from("members")
+        .select("id,nama,fraksi,dapil,komisi,jabatan_dprd,periode,is_active")
+        .order("nama");
+      if (memberError) throw memberError;
       const profileMap = new Map((profiles ?? []).map((p: any) => [String(p.id), p]));
       const bagianMap = new Map((bagianRows ?? []).map((b: any) => [String(b.id), b]));
+      const memberMap = new Map((memberRows ?? []).map((m: any) => [String(m.id), m]));
       const result = users.map((u: any) => {
         const p: any = profileMap.get(String(u.id));
         const b: any = p?.bagian_id ? bagianMap.get(String(p.bagian_id)) : null;
+        const memberId = String(u.app_metadata?.arwana_member_id ?? "") || null;
+        const member: any = memberId ? memberMap.get(memberId) : null;
         return {
           id: u.id,
           email: p?.email ?? u.email ?? "",
@@ -172,12 +196,15 @@ Deno.serve(async (req: Request) => {
           jabatan: p?.jabatan ?? null,
           is_active: p?.is_active !== false,
           can_manage_users: p?.can_manage_users === true,
+          member_id: memberId,
+          member_nama: member?.nama ?? null,
+          member_jabatan_dprd: member?.jabatan_dprd ?? null,
           profile_exists: !!p,
           created_at: p?.created_at ?? u.created_at ?? null,
           last_sign_in_at: u.last_sign_in_at ?? null,
         };
       }).sort((a: any, b: any) => String(a.nama_lengkap || a.email).localeCompare(String(b.nama_lengkap || b.email), "id"));
-      return json(200, { ok: true, users: result, bagian: bagianRows ?? [], capability: { canManage: true, isSekwan } });
+      return json(200, { ok: true, users: result, bagian: bagianRows ?? [], members: memberRows ?? [], capability: { canManage: true, isSekwan } });
     }
 
     if (action === "create") {
@@ -192,12 +219,16 @@ Deno.serve(async (req: Request) => {
       if (name.length < 2) return fail(400, "Nama lengkap minimal 2 karakter.");
       if (password.length < 8) return fail(400, "Kata sandi awal minimal 8 karakter.");
       if (!ALLOWED_ROLES.has(role) || role === "sekretaris_dprd") return fail(400, "Role Sekretaris DPRD tidak dapat dibuat melalui formulir umum. Role tersebut harus diprovisikan secara khusus.");
-      if (!isSekwan && !DELEGATED_ROLES.has(role)) return fail(403, "Admin delegasi hanya dapat membuat akun staf atau Kabag.");
+      if (!isSekwan && !DELEGATED_ROLES.has(role)) return fail(403, "Hanya Sekretaris DPRD yang dapat membuat akun Pimpinan/Anggota DPRD atau role di luar delegasi admin.");
+      let memberId: string | null;
+      try { memberId = await checkDprdMemberLink(role, body.member_id); }
+      catch (error) { return fail(400, errorText(error)); }
       const canManage = isSekwan && role === "admin" && body.can_manage_users === true;
       const { data: created, error: createError } = await adminClient.auth.admin.createUser({
         email,
         password,
         email_confirm: true,
+        app_metadata: { arwana_role: role, arwana_member_id: memberId },
         user_metadata: { nama_lengkap: name, nip, jabatan },
       });
       if (createError) return fail(400, "Gagal membuat akun autentikasi: " + createError.message);
@@ -210,7 +241,7 @@ Deno.serve(async (req: Request) => {
         await adminClient.auth.admin.deleteUser(created.user.id).catch(() => undefined);
         return fail(400, "Profil gagal dibuat; akun Auth baru dibatalkan. Detail: " + upsertError.message);
       }
-      return json(200, { ok: true, user: { id: created.user.id, email, nama_lengkap: name, role }, message: "Akun Auth dan profil berhasil dibuat." });
+      return json(200, { ok: true, user: { id: created.user.id, email, nama_lengkap: name, role, member_id: memberId }, message: "Akun Auth dan profil berhasil dibuat." });
     }
 
     if (action === "update") {
@@ -226,6 +257,9 @@ Deno.serve(async (req: Request) => {
       const jabatan = cleanText(body.jabatan, 160) || null;
       const role = cleanText(body.role, 80);
       const bagianId = await checkBagian(cleanText(body.bagian_id, 64) || null);
+      if (!isSekwan && (["pimpinan_dprd", "anggota_dprd"].includes(String(target?.role ?? "")) || ["pimpinan_dprd", "anggota_dprd"].includes(role))) {
+        return fail(403, "Pengelolaan akun Pimpinan/Anggota DPRD hanya dapat dilakukan oleh Sekretaris DPRD.");
+      }
       if (!validEmail(email)) return fail(400, "Format email tidak valid.");
       if (name.length < 2) return fail(400, "Nama lengkap minimal 2 karakter.");
       if (password && password.length < 8) return fail(400, "Kata sandi baru minimal 8 karakter.");
@@ -233,6 +267,9 @@ Deno.serve(async (req: Request) => {
       if (role === "sekretaris_dprd" && target?.role !== "sekretaris_dprd") return fail(403, "Role Sekretaris DPRD tidak dapat diberikan melalui edit pengguna biasa.");
       if (!isSekwan && !DELEGATED_ROLES.has(role) && role !== target?.role) return fail(403, "Admin delegasi tidak boleh menaikkan role menjadi admin atau Sekretaris DPRD.");
       if (!isSekwan && role !== target?.role) return fail(403, "Admin delegasi tidak boleh mengubah role akun ini.");
+      let memberId: string | null;
+      try { memberId = await checkDprdMemberLink(role, body.member_id); }
+      catch (error) { return fail(400, errorText(error)); }
       const isSelf = id === caller.id;
       if (isSelf && (email !== String(authUser.email ?? target?.email ?? "").toLowerCase() || password || role !== target?.role || (Boolean(body.can_manage_users) !== (target?.can_manage_users === true)))) {
         return fail(403, "Untuk mencegah kehilangan akses, perubahan email, kata sandi, role, atau delegasi akun sendiri tidak diizinkan dari menu ini.");
@@ -249,7 +286,10 @@ Deno.serve(async (req: Request) => {
       };
       const { error: profileWriteError } = await adminClient.from("profiles").upsert(profilePayload, { onConflict: "id" });
       if (profileWriteError) return fail(400, "Gagal menyimpan profil: " + profileWriteError.message);
-      const authChanges: Record<string, unknown> = { user_metadata: { ...(authUser.user_metadata ?? {}), nama_lengkap: name, nip, jabatan } };
+      const authChanges: Record<string, unknown> = {
+        app_metadata: { ...(authUser.app_metadata ?? {}), arwana_role: role, arwana_member_id: memberId },
+        user_metadata: { ...(authUser.user_metadata ?? {}), nama_lengkap: name, nip, jabatan },
+      };
       if (email !== String(authUser.email ?? "").toLowerCase()) {
         authChanges.email = email;
         authChanges.email_confirm = true;
@@ -261,7 +301,7 @@ Deno.serve(async (req: Request) => {
         else await adminClient.from("profiles").delete().eq("id", id);
         return fail(400, "Profil tidak dipertahankan karena pembaruan Auth gagal. Detail: " + authUpdateError.message);
       }
-      return json(200, { ok: true, user: { id, email, nama_lengkap: name, role }, message: "Profil dan akun berhasil diperbarui." });
+      return json(200, { ok: true, user: { id, email, nama_lengkap: name, role, member_id: memberId }, message: "Profil dan akun berhasil diperbarui." });
     }
 
     if (action === "status") {
